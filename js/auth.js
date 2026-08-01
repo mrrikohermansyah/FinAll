@@ -37,7 +37,7 @@
       if (!cleanEmail) throw new Error("Email tidak valid");
       if (!password) throw new Error("Password diperlukan");
 
-      const persistence = remember
+      const persistence = remember || this.isMobileBrowser()
         ? firebase.auth.Auth.Persistence.LOCAL
         : firebase.auth.Auth.Persistence.SESSION;
 

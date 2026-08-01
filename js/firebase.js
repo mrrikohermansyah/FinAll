@@ -9,8 +9,8 @@ const authDomainByHost = {
   localhost: "localhost",
   "127.0.0.1": "127.0.0.1",
   "192.168.7.144": "192.168.7.144",
-  "finall.futureproject.my.id": "finall.futureproject.my.id",
-  "www.futureproject.my.id": "www.futureproject.my.id",
+  "finall.futureproject.my.id": "finall-b5c2e.firebaseapp.com",
+  "www.futureproject.my.id": "finall-b5c2e.firebaseapp.com",
 };
 
 const firebaseConfig = {
@@ -46,8 +46,15 @@ function initFirebase() {
       return false;
     }
 
+    const configuredAuthDomain =
+      authDomainByHost[window.location.hostname] || firebaseConfig.authDomain;
+    const firebaseAppConfig = {
+      ...firebaseConfig,
+      authDomain: configuredAuthDomain,
+    };
+
     if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+      firebase.initializeApp(firebaseAppConfig);
     } else {
       firebase.app();
     }
