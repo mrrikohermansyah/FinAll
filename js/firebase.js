@@ -5,9 +5,19 @@
 
 // ⚠️ PENTING: Ganti konfigurasi di bawah ini dengan Firebase Project Anda
 // Dapatkan dari Firebase Console → Project Settings → Add App
+const authDomainByHost = {
+  localhost: "localhost",
+  "127.0.0.1": "127.0.0.1",
+  "192.168.7.144": "192.168.7.144",
+  "finall.futureproject.my.id": "finall.futureproject.my.id",
+  "www.futureproject.my.id": "www.futureproject.my.id",
+};
+
 const firebaseConfig = {
   apiKey: "AIzaSyCsh9_5bv_U7E9slwxDzAMQRXNiubaMfZw",
-  authDomain: "finall-b5c2e.firebaseapp.com",
+  authDomain:
+    authDomainByHost[window.location.hostname] ||
+    "finall-b5c2e.firebaseapp.com",
   projectId: "finall-b5c2e",
   storageBucket: "finall-b5c2e.firebasestorage.app",
   messagingSenderId: "813686056225",
