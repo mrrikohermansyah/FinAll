@@ -16,6 +16,10 @@
     ],
     "rewrites": [
       {
+        "source": "/firebase/init.json",
+        "destination": "/firebase/init.json"
+      },
+      {
         "source": "/dashboard",
         "destination": "/dashboard.html"
       },
