@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="noBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F8F9FA"/>
+      <stop offset="100%" stop-color="#EEF3F1"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#noBg)" rx="16"/>
+  <g transform="translate(150,80)">
+    <rect x="0" y="30" width="100" height="120" rx="14" fill="#ffffff" stroke="#D8E3DE" stroke-width="2"/>
+    <line x1="0" y1="64" x2="100" y2="64" stroke="#D8E3DE" stroke-width="2"/>
+    <circle cx="50" cy="47" r="6" fill="#E76F51"/>
+    <rect x="62" y="43" width="28" height="8" rx="4" fill="#E76F51"/>
+    <g transform="translate(25,86)">
+      <path d="M0 10 l10 30 l40 0 l10 -30 z" fill="#FFD166"/>
+      <path d="M12 28 l14 -18 l14 18 z" fill="#F4A261"/>
+      <circle cx="35" cy="5" r="4" fill="#5F8D7E"/>
+    </g>
+  </g>
+  <text x="200" y="250" text-anchor="middle" font-family="Inter, sans-serif" font-size="15" font-weight="600" fill="#5F8D7E">Tidak ada transaksi</text>
+  <text x="200" y="272" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#8DA39C">Klik tombol + untuk menambahkan alokasi baru</text>
+</svg>

@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "build": "001",
+  "releaseDate": "2026-08-01",
+  "releaseNote": "Initial Release",
+  "changes": [
+    "Authentication System (Register, Login, Logout, Forgot Password)",
+    "Dashboard with Summary Cards, Charts (Pie, Bar, Line)",
+    "Transaction Management (CRUD, Filters, Search, Sort, Pagination)",
+    "Reports Module with Visualizations and Exports",
+    "Settings: Custom Categories & Admin Transactions",
+    "Salary Input with Monthly History",
+    "Dark Mode & Light Mode",
+    "Responsive Design (Mobile First)",
+    "Toast Notifications & Loading States",
+    "Payment Status Tracking with Color Coding",
+    "Auto Currency Format (Indonesia Rupiah)"
+  ]
+}

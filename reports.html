@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="FinAll" />
+    <meta name="theme-color" content="#5F8D7E" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="description" content="Laporan keuangan bulanan - FinAll" />
+    <title>Laporan - FinAll</title>
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+  </head>
+  <body>
+    <div class="loading-screen">
+      <div class="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-logo">FinAll</div>
+      </div>
+    </div>
+
+    <div class="app-layout">
+      <div class="sidebar-overlay"></div>
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">F</div>
+          <div>
+            <div class="sidebar-brand">FinAll</div>
+            <div class="sidebar-sub">Financial Allocation</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-label">Menu Utama</div>
+            <a href="dashboard.html" class="nav-item">
+              <span class="nav-icon"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect></svg
+              ></span>
+              <span>Dashboard</span>
+            </a>
+            <a href="transaction.html" class="nav-item">
+              <span class="nav-icon"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path
+                    d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                  ></path></svg
+              ></span>
+              <span>Transaksi</span>
+            </a>
+            <a href="reports.html" class="nav-item active">
+              <span class="nav-icon"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line></svg
+              ></span>
+              <span>Laporan</span>
+            </a>
+          </div>
+          <div class="nav-section">
+            <div class="nav-label">Lainnya</div>
+            <a href="settings.html" class="nav-item">
+              <span class="nav-icon"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path></svg
+              ></span>
+              <span>Pengaturan</span>
+            </a>
+            <a href="release-notes.html" class="nav-item">
+              <span class="nav-icon"
+                ><svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  ></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line></svg
+              ></span>
+              <span>Release Notes</span>
+            </a>
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-card">
+            <div class="user-avatar" data-user-avatar>?</div>
+            <div class="user-info">
+              <div class="user-name" data-user-name>Memuat...</div>
+              <div class="user-email" data-user-email>...</div>
+            </div>
+          </div>
+          <div class="sidebar-actions">
+            <button
+              class="icon-btn tooltip"
+              data-theme-toggle
+              data-tooltip="Ganti Tema"
+            ></button>
+            <button
+              class="icon-btn logout tooltip"
+              data-logout
+              data-tooltip="Keluar"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main-content">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="menu-toggle" data-sidebar-toggle>
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div>
+              <div class="page-title">Laporan</div>
+              <div class="page-breadcrumb">
+                Analisis dan ringkasan keuangan Anda
+              </div>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <button
+              class="icon-btn tooltip"
+              data-theme-toggle
+              data-tooltip="Ganti Tema"
+            ></button>
+          </div>
+        </header>
+
+        <main class="page-content">
+          <!-- Filter -->
+          <div class="filter-bar">
+            <select
+              class="form-control"
+              id="reportMonth"
+              style="max-width: 180px"
+            ></select>
+            <select
+              class="form-control"
+              id="reportYear"
+              style="max-width: 140px"
+            ></select>
+            <div class="spacer"></div>
+            <div class="filter-actions">
+              <button class="btn btn-secondary btn-sm" id="exportReportCSV">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export CSV
+              </button>
+              <button class="btn btn-secondary btn-sm" id="printReportBtn">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                >
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path
+                    d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+                  ></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Print
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary Cards -->
+          <section class="report-summary">
+            <div class="report-card animate-fade-up animate-delay-1">
+              <div class="report-card-label">Total Gaji</div>
+              <div class="report-card-value" id="rptSalary">Rp 0</div>
+              <div class="report-card-sub" id="rptSalaryPeriod">-</div>
+            </div>
+            <div class="report-card animate-fade-up animate-delay-2">
+              <div class="report-card-label">Total Alokasi</div>
+              <div
+                class="report-card-value"
+                id="rptAllocated"
+                style="color: var(--accent)"
+              >
+                Rp 0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptAllocPct">0%</span> dari gaji
+              </div>
+            </div>
+            <div class="report-card animate-fade-up animate-delay-3">
+              <div class="report-card-label">Sisa Gaji</div>
+              <div
+                class="report-card-value"
+                id="rptRemaining"
+                style="color: var(--success)"
+              >
+                Rp 0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptRemPct">0%</span> tersisa
+              </div>
+            </div>
+            <div class="report-card animate-fade-up animate-delay-4">
+              <div class="report-card-label">Pengeluaran Tetap</div>
+              <div
+                class="report-card-value"
+                id="rptFixed"
+                style="color: var(--accent)"
+              >
+                Rp 0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptFixedPct">0%</span> dari gaji
+              </div>
+            </div>
+            <div class="report-card animate-fade-up animate-delay-1">
+              <div class="report-card-label">Pengeluaran Berubah</div>
+              <div
+                class="report-card-value"
+                id="rptVariable"
+                style="color: #5f8d7e"
+              >
+                Rp 0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptVarPct">0%</span> dari gaji
+              </div>
+            </div>
+            <div class="report-card animate-fade-up animate-delay-2">
+              <div class="report-card-label">Total Tabungan</div>
+              <div
+                class="report-card-value"
+                id="rptSaving"
+                style="color: #c49417"
+              >
+                Rp 0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptSavingPct">0%</span> dari gaji
+              </div>
+            </div>
+          </section>
+
+          <!-- Additional Summary -->
+          <section
+            class="report-summary"
+            style="
+              grid-template-columns: repeat(4, 1fr);
+              margin-top: 16px;
+              margin-bottom: 24px;
+            "
+          >
+            <div class="report-card">
+              <div class="report-card-label">Total Admin</div>
+              <div
+                class="report-card-value"
+                id="rptAdmin"
+                style="color: var(--primary)"
+              >
+                Rp 0
+              </div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-label">Transaksi Dibayar</div>
+              <div
+                class="report-card-value"
+                id="rptPaid"
+                style="color: var(--success)"
+              >
+                0
+              </div>
+              <div class="report-card-sub">
+                <span id="rptPaidPct">0%</span> selesai
+              </div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-label">Belum Dibayar</div>
+              <div
+                class="report-card-value"
+                id="rptUnpaid"
+                style="color: var(--danger)"
+              >
+                0
+              </div>
+              <div class="report-card-sub">sisa tagihan</div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-label">Kategori Terbesar</div>
+              <div
+                class="report-card-value"
+                id="rptTopCategory"
+                style="font-size: 16px"
+              >
+                -
+              </div>
+              <div class="report-card-sub" id="rptTopCategoryAmount">Rp 0</div>
+            </div>
+          </section>
+
+          <!-- Charts -->
+          <section class="report-charts-grid">
+            <div class="chart-card animate-fade-up">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">🥧 Komposisi Pengeluaran</div>
+                  <div class="chart-subtitle">Persentase per kategori</div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="rptPieChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card animate-fade-up">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">📊 Nominal per Kategori</div>
+                  <div class="chart-subtitle">Urut dari terbesar</div>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="rptBarChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card animate-fade-up full-width">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">📈 Trend 6 Bulan Terakhir</div>
+                  <div class="chart-subtitle">
+                    Gaji, Alokasi, Sisa, dan Tabungan
+                  </div>
+                </div>
+              </div>
+              <div class="chart-container" style="height: 300px">
+                <canvas id="rptLineChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card animate-fade-up full-width">
+              <div class="chart-header">
+                <div>
+                  <div class="chart-title">📋 Ringkasan Detail</div>
+                  <div class="chart-subtitle">
+                    Semua transaksi periode terpilih
+                  </div>
+                </div>
+              </div>
+              <div class="table-wrapper" style="border: none">
+                <table class="table" id="rptTable">
+                  <thead>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Nama</th>
+                      <th>Kategori</th>
+                      <th>Nominal</th>
+                      <th>Admin</th>
+                      <th>Total</th>
+                      <th>%</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rptTableBody">
+                    <tr>
+                      <td colspan="8">
+                        <div class="table-empty">Memuat data...</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/report.js"></script>
+    <script>
+      window.onAppReady = function () {
+        renderUserInfo();
+        setupSidebar();
+        Shortcuts.init();
+      };
+      bootstrapApp(true);
+    </script>
+  </body>
+</html>
