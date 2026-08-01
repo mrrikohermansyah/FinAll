@@ -423,22 +423,22 @@
         }
         VersionCheck.check();
 
+        App.auth.onAuthStateChanged((user) => {
+          Loader.hide(300);
+          if (user) {
+            window.location.replace("dashboard.html");
+          }
+        });
+
         try {
           const redirectResult = await App.auth.getRedirectResult();
           if (redirectResult?.user) {
-            window.location.href = "dashboard.html";
+            window.location.replace("dashboard.html");
             return;
           }
         } catch (err) {
           console.warn("Google redirect result error:", err);
         }
-
-        App.auth.onAuthStateChanged((user) => {
-          Loader.hide(300);
-          if (user) {
-            window.location.href = "dashboard.html";
-          }
-        });
       });
     </script>
   </body>
