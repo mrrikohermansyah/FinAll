@@ -140,7 +140,7 @@
         );
       }
       const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account", hd: "*" });
+      provider.setCustomParameters({ prompt: "select_account" });
       provider.addScope("profile");
       provider.addScope("email");
 

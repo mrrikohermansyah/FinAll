@@ -92,7 +92,7 @@ const IDR = {
       const newPos = cursorPos + (inputEl.value.length - oldValue.length);
       try {
         inputEl.setSelectionRange(Math.max(3, newPos), Math.max(3, newPos));
-      } catch (e) {}
+      } catch (e) { }
     });
     inputEl.addEventListener("blur", () => {
       const numeric = this.parse(inputEl.value);
@@ -269,7 +269,7 @@ const Modal = {
       `,
       footer: `
         <button class="btn btn-secondary" data-action="cancel">Batal</button>
-        <button class="btn btn-danger" data-action="confirm">Ya, Hapus</button>
+        <button class="btn btn-danger" data-action="confirm">Ya, Keluar</button>
       `,
     });
 
