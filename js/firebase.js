@@ -815,16 +815,31 @@ function bootstrapApp(needsAuth = false) {
   }
   VersionCheck.check();
 
+  let authRedirectTimer = null;
+  let authRedirectScheduled = false;
+
   App.auth.onAuthStateChanged((user) => {
     App.currentUser = user;
     App.ready = true;
+
     if (needsAuth) {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
+      if (user) {
+        authRedirectScheduled = false;
+        if (authRedirectTimer) {
+          clearTimeout(authRedirectTimer);
+          authRedirectTimer = null;
+        }
+        _ensureUserSetup();
+      } else if (!authRedirectScheduled) {
+        authRedirectScheduled = true;
+        authRedirectTimer = setTimeout(() => {
+          if (!App.currentUser && !App.auth?.currentUser) {
+            window.location.href = "login.html";
+          }
+        }, 1200);
       }
-      _ensureUserSetup();
     }
+
     if (typeof onAppReady === "function") onAppReady();
     Loader.hide(400);
   });

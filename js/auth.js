@@ -77,7 +77,7 @@
     },
 
     guard(page = "dashboard") {
-      const user = App.auth.currentUser;
+      const user = App.currentUser || App.auth?.currentUser;
       if (!user) {
         window.location.href = "login.html";
         return false;
