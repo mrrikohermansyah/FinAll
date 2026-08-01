@@ -149,8 +149,13 @@
 
       await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
+      const isLocalDevelopment =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        /^192\.168\./.test(window.location.hostname);
+
       const shouldUseRedirect =
-        useRedirect || this.isMobileBrowser();
+        useRedirect || this.isMobileBrowser() || !isLocalDevelopment;
 
       if (shouldUseRedirect) {
         await App.auth.signInWithRedirect(provider);
@@ -162,11 +167,9 @@
         this.currentUser = result.user;
         return this.currentUser;
       } catch (err) {
-        if (this.isMobileBrowser()) {
-          await App.auth.signInWithRedirect(provider);
-          return null;
-        }
-        throw err;
+        console.warn("Google popup auth failed, retrying via redirect:", err);
+        await App.auth.signInWithRedirect(provider);
+        return null;
       }
     },
   };
@@ -221,12 +224,16 @@
     if (googleBtn) {
       googleBtn.addEventListener("click", async (e) => {
         e.preventDefault();
-        googleBtn.disabled = true;
         const prev = googleBtn.innerHTML;
-        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Masuk dengan Google...`;
+        googleBtn.disabled = true;
+        googleBtn.dataset.redirecting = "false";
+        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Mengalihkan ke Google...`;
         try {
           const result = await Auth.loginWithGoogle(false);
-          if (!result) return;
+          if (!result) {
+            googleBtn.dataset.redirecting = "true";
+            return;
+          }
           Toast.success(
             "Login dengan Google berhasil! Mengarahkan ke dashboard...",
           );
@@ -236,8 +243,10 @@
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Login Google");
         } finally {
-          googleBtn.disabled = false;
-          googleBtn.innerHTML = prev;
+          if (googleBtn.dataset.redirecting !== "true") {
+            googleBtn.disabled = false;
+            googleBtn.innerHTML = prev;
+          }
         }
       });
     }
@@ -308,12 +317,16 @@
     if (googleBtn) {
       googleBtn.addEventListener("click", async (e) => {
         e.preventDefault();
-        googleBtn.disabled = true;
         const prev = googleBtn.innerHTML;
-        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Daftar dengan Google...`;
+        googleBtn.disabled = true;
+        googleBtn.dataset.redirecting = "false";
+        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Mengalihkan ke Google...`;
         try {
           const result = await Auth.loginWithGoogle(false);
-          if (!result) return;
+          if (!result) {
+            googleBtn.dataset.redirecting = "true";
+            return;
+          }
           Toast.success(
             "Daftar dengan Google berhasil! Mengarahkan ke dashboard...",
           );
@@ -323,8 +336,10 @@
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Daftar Google");
         } finally {
-          googleBtn.disabled = false;
-          googleBtn.innerHTML = prev;
+          if (googleBtn.dataset.redirecting !== "true") {
+            googleBtn.disabled = false;
+            googleBtn.innerHTML = prev;
+          }
         }
       });
     }
