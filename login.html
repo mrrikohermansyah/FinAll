@@ -293,7 +293,7 @@
     <script src="js/firebase.js"></script>
     <script src="js/auth.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
         Theme.init();
         if (!initFirebase()) {
           setTimeout(() => {
@@ -307,6 +307,12 @@
           return;
         }
         VersionCheck.check();
+
+        try {
+          await App.auth.getRedirectResult();
+        } catch (err) {
+          console.warn("Google redirect result error:", err);
+        }
 
         App.auth.onAuthStateChanged((user) => {
           Loader.hide(300);

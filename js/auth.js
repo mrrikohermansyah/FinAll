@@ -123,6 +123,16 @@
       };
     },
 
+    isMobileBrowser() {
+      return (
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ) ||
+        (window.matchMedia &&
+          window.matchMedia("(pointer: coarse)").matches)
+      );
+    },
+
     async loginWithGoogle(useRedirect = false) {
       if (!firebase.auth?.GoogleAuthProvider) {
         throw new Error(
@@ -136,14 +146,25 @@
 
       await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-      if (useRedirect) {
+      const shouldUseRedirect =
+        useRedirect || this.isMobileBrowser();
+
+      if (shouldUseRedirect) {
         await App.auth.signInWithRedirect(provider);
         return null;
       }
 
-      const result = await App.auth.signInWithPopup(provider);
-      this.currentUser = result.user;
-      return this.currentUser;
+      try {
+        const result = await App.auth.signInWithPopup(provider);
+        this.currentUser = result.user;
+        return this.currentUser;
+      } catch (err) {
+        if (this.isMobileBrowser()) {
+          await App.auth.signInWithRedirect(provider);
+          return null;
+        }
+        throw err;
+      }
     },
   };
 
@@ -201,7 +222,8 @@
         const prev = googleBtn.innerHTML;
         googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Masuk dengan Google...`;
         try {
-          await Auth.loginWithGoogle(false);
+          const result = await Auth.loginWithGoogle(false);
+          if (!result) return;
           Toast.success(
             "Login dengan Google berhasil! Mengarahkan ke dashboard...",
           );
@@ -287,7 +309,8 @@
         const prev = googleBtn.innerHTML;
         googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Daftar dengan Google...`;
         try {
-          await Auth.loginWithGoogle(false);
+          const result = await Auth.loginWithGoogle(false);
+          if (!result) return;
           Toast.success(
             "Daftar dengan Google berhasil! Mengarahkan ke dashboard...",
           );
