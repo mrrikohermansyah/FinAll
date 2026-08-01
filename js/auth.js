@@ -140,9 +140,12 @@
         );
       }
       const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
       provider.addScope("profile");
       provider.addScope("email");
+
+      if (this.isMobileBrowser()) {
+        provider.setCustomParameters({ prompt: "select_account" });
+      }
 
       await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
