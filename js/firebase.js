@@ -15,9 +15,7 @@ const authDomainByHost = {
 
 const firebaseConfig = {
   apiKey: "AIzaSyCsh9_5bv_U7E9slwxDzAMQRXNiubaMfZw",
-  authDomain:
-    authDomainByHost[window.location.hostname] ||
-    "finall-b5c2e.firebaseapp.com",
+  authDomain: "finall-b5c2e.firebaseapp.com",
   projectId: "finall-b5c2e",
   storageBucket: "finall-b5c2e.firebasestorage.app",
   messagingSenderId: "813686056225",
