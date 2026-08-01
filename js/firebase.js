@@ -5,15 +5,9 @@
 
 // ⚠️ PENTING: Ganti konfigurasi di bawah ini dengan Firebase Project Anda
 // Dapatkan dari Firebase Console → Project Settings → Add App
-const activeHostname =
-  window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-    ? "localhost"
-    : window.location.hostname;
-
 const firebaseConfig = {
   apiKey: "AIzaSyCsh9_5bv_U7E9slwxDzAMQRXNiubaMfZw",
-  authDomain: activeHostname,
+  authDomain: "finall-b5c2e.firebaseapp.com",
   projectId: "finall-b5c2e",
   storageBucket: "finall-b5c2e.firebasestorage.app",
   messagingSenderId: "813686056225",
