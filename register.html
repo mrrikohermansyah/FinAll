@@ -424,7 +424,11 @@
         VersionCheck.check();
 
         try {
-          await App.auth.getRedirectResult();
+          const redirectResult = await App.auth.getRedirectResult();
+          if (redirectResult?.user) {
+            window.location.href = "dashboard.html";
+            return;
+          }
         } catch (err) {
           console.warn("Google redirect result error:", err);
         }
