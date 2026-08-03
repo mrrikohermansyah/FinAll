@@ -426,14 +426,14 @@
         App.auth.onAuthStateChanged((user) => {
           Loader.hide(300);
           if (user) {
-            window.location.replace("dashboard.html");
+            window.location.replace("./dashboard.html");
           }
         });
 
         try {
           const redirectResult = await App.auth.getRedirectResult();
           if (redirectResult?.user) {
-            window.location.replace("dashboard.html");
+            window.location.replace("./dashboard.html");
             return;
           }
         } catch (err) {

@@ -6,6 +6,12 @@
 (function () {
   "use strict";
 
+  const AppUrl = {
+    to(page) {
+      return new URL(page, window.location.href).toString();
+    },
+  };
+
   const Auth = {
     currentUser: null,
 
@@ -59,7 +65,7 @@
       const cleanEmail = Sanitize.email(email);
       if (!cleanEmail) throw new Error("Email tidak valid");
       await App.auth.sendPasswordResetEmail(cleanEmail, {
-        url: window.location.origin + "/login.html",
+        url: AppUrl.to("login.html"),
         handleCodeInApp: false,
       });
     },
@@ -68,7 +74,7 @@
       try {
         if (this.currentUser && !this.currentUser.emailVerified) {
           await this.currentUser.sendEmailVerification({
-            url: window.location.origin + "/dashboard.html",
+            url: AppUrl.to("dashboard.html"),
           });
         }
       } catch (e) {
@@ -79,7 +85,7 @@
     guard(page = "dashboard") {
       const user = App.currentUser || App.auth?.currentUser;
       if (!user) {
-        window.location.href = "login.html";
+        window.location.replace(AppUrl.to("login.html"));
         return false;
       }
       return true;
@@ -149,13 +155,7 @@
 
       await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-      const isLocalDevelopment =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        /^192\.168\./.test(window.location.hostname);
-
-      const shouldUseRedirect =
-        useRedirect || this.isMobileBrowser() || !isLocalDevelopment;
+      const shouldUseRedirect = useRedirect || this.isMobileBrowser();
 
       if (shouldUseRedirect) {
         await App.auth.signInWithRedirect(provider);
@@ -204,7 +204,7 @@
         await Auth.login(email, password, remember);
         Toast.success("Login berhasil! Mengarahkan ke dashboard...");
         setTimeout(() => {
-          window.location.href = "dashboard.html";
+          window.location.replace(AppUrl.to("dashboard.html"));
         }, 800);
       } catch (err) {
         const msg = mapAuthError(err);
@@ -238,7 +238,7 @@
             "Login dengan Google berhasil! Mengarahkan ke dashboard...",
           );
           setTimeout(() => {
-            window.location.href = "dashboard.html";
+            window.location.replace(AppUrl.to("dashboard.html"));
           }, 800);
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Login Google");
@@ -302,7 +302,7 @@
         await Auth.register(email, password, name);
         Toast.success("Akun berhasil dibuat! Mengarahkan ke dashboard...");
         setTimeout(() => {
-          window.location.href = "dashboard.html";
+          window.location.replace(AppUrl.to("dashboard.html"));
         }, 1200);
       } catch (err) {
         const msg = mapAuthError(err);
@@ -331,7 +331,7 @@
             "Daftar dengan Google berhasil! Mengarahkan ke dashboard...",
           );
           setTimeout(() => {
-            window.location.href = "dashboard.html";
+            window.location.replace(AppUrl.to("dashboard.html"));
           }, 1200);
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Daftar Google");
@@ -404,7 +404,7 @@
               await Auth.logout();
               Toast.success("Anda berhasil keluar");
               setTimeout(() => {
-                window.location.href = "login.html";
+                window.location.replace(AppUrl.to("login.html"));
               }, 500);
             } catch (err) {
               Toast.error("Gagal logout");

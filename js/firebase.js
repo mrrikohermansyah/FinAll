@@ -834,7 +834,7 @@ function bootstrapApp(needsAuth = false) {
         authRedirectScheduled = true;
         authRedirectTimer = setTimeout(() => {
           if (!App.currentUser && !App.auth?.currentUser) {
-            window.location.href = "login.html";
+            window.location.replace("login.html");
           }
         }, 1200);
       }
