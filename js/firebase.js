@@ -64,6 +64,13 @@ function initFirebase() {
     App.db = firebase.firestore();
     App.firestoreInitialized = true;
 
+    // ✅ FIX 1: Paksa Persistence LOCAL secara global segera setelah init
+    // Safari iOS (ITP) sering memblokir sessionStorage. Memaksa LOCAL (IndexedDB)
+    // memastikan session tidak hilang saat navigasi/redirect dari Google.
+    App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch((e) => {
+      console.warn("Failed to set auth persistence:", e);
+    });
+
     return true;
   } catch (e) {
     console.error("Firebase init error:", e);
@@ -833,11 +840,19 @@ function bootstrapApp(needsAuth = false) {
         _ensureUserSetup();
       } else if (!authRedirectScheduled) {
         authRedirectScheduled = true;
+        
+        // ✅ FIX 2: Timeout dinamis berdasarkan device
+        // 1200ms terlalu cepat untuk HP (iOS/Android) memuat session dari IndexedDB.
+        // Ini yang menyebabkan infinite loop (ditendang ke login -> balik ke dashboard -> ditendang lagi).
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                         (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+        const delay = isMobile ? 5000 : 1500;
+
         authRedirectTimer = setTimeout(() => {
           if (!App.currentUser && !App.auth?.currentUser) {
             window.location.replace("login.html");
           }
-        }, 1200);
+        }, delay);
       }
     }
 

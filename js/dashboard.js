@@ -28,15 +28,90 @@
     "#D4A017",
   ];
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const checkInterval = setInterval(() => {
-      if (App.ready && App.currentUser) {
-        clearInterval(checkInterval);
-        initDashboard();
-      }
-    }, 50);
-    setTimeout(() => clearInterval(checkInterval), 5000);
+  /* ============================================
+     FIXED: Inisialisasi yang benar untuk Mobile
+     ============================================ */
+  document.addEventListener("DOMContentLoaded", async () => {
+    // Step 1: Tunggu Firebase SDK siap
+    await waitForFirebaseReady();
+
+    // Step 2: Tunggu status auth yang sebenarnya dari Firebase
+    // Ini CRUCIAL untuk iOS/Android karena Firebase butuh waktu untuk
+    // memuat data login dari IndexedDB setelah redirect Google
+    const user = await waitForAuthState();
+
+    if (!user) {
+      console.warn("[Dashboard] Tidak ada user, redirect ke login");
+      window.location.replace("login.html");
+      return;
+    }
+
+    // Pastikan App.currentUser ter-set
+    if (window.App) {
+      App.currentUser = user;
+    }
+
+    // Step 3: Inisialisasi dashboard
+    try {
+      await initDashboard();
+    } catch (e) {
+      console.error("Dashboard init error:", e);
+      Toast.error("Gagal memuat data dashboard");
+    }
   });
+
+  /**
+   * Tunggu hingga Firebase SDK selesai inisialisasi
+   */
+  function waitForFirebaseReady() {
+    return new Promise((resolve) => {
+      if (window.App?.ready) {
+        resolve();
+        return;
+      }
+
+      const checkInterval = setInterval(() => {
+        if (window.App?.ready) {
+          clearInterval(checkInterval);
+          clearTimeout(timeout);
+          resolve();
+        }
+      }, 50);
+
+      const timeout = setTimeout(() => {
+        clearInterval(checkInterval);
+        console.warn("[Dashboard] Firebase ready timeout, melanjutkan...");
+        resolve(); // Lanjutkan meski timeout
+      }, 5000);
+    });
+  }
+
+  /**
+   * Tunggu status auth yang sebenarnya dari Firebase via onAuthStateChanged
+   * Ini adalah cara yang PALING RELIABLE untuk mendeteksi user di iOS/Android
+   */
+  function waitForAuthState() {
+    return new Promise((resolve) => {
+      if (!window.App?.auth) {
+        console.warn("[Dashboard] App.auth tidak tersedia");
+        resolve(null);
+        return;
+      }
+
+      const timeout = setTimeout(() => {
+        console.warn("[Dashboard] Auth state timeout");
+        unsubscribe();
+        resolve(null);
+      }, 8000); // Timeout 8 detik untuk mobile yang lambat
+
+      const unsubscribe = App.auth.onAuthStateChanged((user) => {
+        clearTimeout(timeout);
+        unsubscribe();
+        console.log("[Dashboard] Auth state resolved:", user?.email || "null");
+        resolve(user);
+      });
+    });
+  }
 
   async function initDashboard() {
     try {
