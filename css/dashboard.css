@@ -152,7 +152,8 @@
   margin-bottom: 24px;
 }
 
-.charts-grid .chart-card:first-child {
+.charts-grid .chart-card:first-child,
+.charts-grid .chart-double {
   grid-column: span 2;
 }
 
@@ -555,6 +556,7 @@
   gap: 8px;
   overflow-x: auto;
   padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .salary-history-item {
@@ -1407,7 +1409,8 @@
     grid-template-columns: 1fr;
   }
 
-  .charts-grid .chart-card:first-child {
+  .charts-grid .chart-card:first-child,
+  .charts-grid .chart-double {
     grid-column: span 1;
   }
 
@@ -1597,8 +1600,15 @@
     font-size: 18px;
   }
 
+  .salary-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
   .salary-current {
     padding: 10px 16px;
+    text-align: center;
   }
 
   .category-card {
@@ -1642,6 +1652,17 @@
 @media (max-width: 480px) {
   .status-grid {
     grid-template-columns: 1fr;
+  }
+
+  .salary-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .salary-actions .btn {
+    width: 100%;
   }
 
   .report-summary {
