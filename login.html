@@ -315,14 +315,9 @@
           }
         });
 
-        try {
-          const redirectResult = await App.auth.getRedirectResult();
-          if (redirectResult?.user) {
-            window.location.replace("./dashboard.html");
-            return;
-          }
-        } catch (err) {
-          console.warn("Google redirect result error:", err);
+        const handledRedirect = await Auth.handleGoogleRedirect("dashboard.html");
+        if (handledRedirect) {
+          return;
         }
       });
     </script>

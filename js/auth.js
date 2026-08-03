@@ -98,6 +98,21 @@
       });
     },
 
+    async handleGoogleRedirect(returnPage = "dashboard.html") {
+      try {
+        const redirectResult = await App.auth.getRedirectResult();
+        if (redirectResult?.user) {
+          this.currentUser = redirectResult.user;
+          App.currentUser = redirectResult.user;
+          window.location.replace(AppUrl.to(returnPage));
+          return true;
+        }
+      } catch (err) {
+        console.warn("Google redirect result error:", err);
+      }
+      return false;
+    },
+
     passwordStrength(password) {
       if (!password) return { score: 0, label: "" };
       let score = 0;
