@@ -503,10 +503,27 @@
   /* ============================================
      Init Pages
      ============================================ */
+  
+  async function checkPendingGoogleRedirect() {
+  const isAuthPage =
+    document.getElementById("loginForm") || document.getElementById("registerForm");
+  if (!isAuthPage) return;
+
+  // tunggu App.auth siap (init Firebase kadang belum selesai saat DOMContentLoaded)
+  let tries = 0;
+  while (!window.App?.auth && tries < 20) {
+    await new Promise((r) => setTimeout(r, 100));
+    tries++;
+  }
+  if (!window.App?.auth) return;
+
+  await Auth.handleGoogleRedirect("dashboard.html");
+}
   document.addEventListener("DOMContentLoaded", () => {
     initLoginPage();
     initRegisterPage();
     initLogoutButtons();
+    checkPendingGoogleRedirect();
 
     if (typeof onAuthPagesReady === "function") onAuthPagesReady();
   });
