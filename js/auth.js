@@ -1,7 +1,7 @@
 /* ============================================
    Authentication Module
-   Personal Financial Allocation v1.0.2
-   Fixed: iOS/Android redirect with proper auth state handling
+   Personal Financial Allocation v1.0.3
+   Fixed: iOS/Android redirect + Root domain routing
    ============================================ */
 
 (function () {
@@ -9,7 +9,9 @@
 
   const AppUrl = {
     to(page) {
-      return new URL(page, window.location.href).toString();
+      // Dapatkan base URL dari current location
+      const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+      return new URL(page, baseUrl).toString();
     },
   };
 
@@ -60,9 +62,11 @@
     async logout() {
       await App.auth.signOut();
       this.currentUser = null;
+      // Bersihkan semua localStorage terkait auth
       localStorage.removeItem('authRedirect');
       localStorage.removeItem('authTimestamp');
       localStorage.removeItem('pendingGoogleAuth');
+      localStorage.removeItem('googleRedirectInProgress');
     },
 
     async forgotPassword(email) {
@@ -100,83 +104,6 @@
         this.currentUser = user;
         if (callback) callback(user);
       });
-    },
-
-    async handleGoogleRedirect(returnPage = "dashboard.html") {
-      console.log("=== handleGoogleRedirect called ===");
-      console.log("Time:", new Date().toISOString());
-      console.log("Has App.auth:", !!App.auth);
-      console.log("Current user:", App.auth?.currentUser?.email);
-
-      try {
-        if (!App.auth) {
-          console.error("App.auth not initialized");
-          return false;
-        }
-
-        // Coba dapatkan redirect result
-        const redirectResult = await App.auth.getRedirectResult();
-        console.log("Redirect result:", {
-          hasUser: !!redirectResult?.user,
-          email: redirectResult?.user?.email,
-          error: redirectResult?.error?.code
-        });
-
-        if (redirectResult?.user) {
-          console.log("✅ User found from redirect result");
-          this.currentUser = redirectResult.user;
-          App.currentUser = redirectResult.user;
-          
-          // Bersihkan flags
-          localStorage.removeItem('authRedirect');
-          localStorage.removeItem('authTimestamp');
-          localStorage.removeItem('pendingGoogleAuth');
-          
-          // Redirect ke dashboard
-          console.log("Redirecting to:", returnPage);
-          window.location.href = AppUrl.to(returnPage); // Gunakan href bukan replace
-          return true;
-        }
-
-        // Jika tidak ada redirect result, cek currentUser
-        const currentUser = App.auth.currentUser;
-        if (currentUser) {
-          console.log("✅ User found from currentUser");
-          this.currentUser = currentUser;
-          App.currentUser = currentUser;
-          
-          localStorage.removeItem('authRedirect');
-          localStorage.removeItem('authTimestamp');
-          localStorage.removeItem('pendingGoogleAuth');
-          
-          console.log("Redirecting to:", returnPage);
-          window.location.href = AppUrl.to(returnPage);
-          return true;
-        }
-
-        console.log("❌ No user found in redirect or current state");
-        return false;
-
-      } catch (err) {
-        console.error("Error in handleGoogleRedirect:", err);
-        
-        // Fallback: cek currentUser jika getRedirectResult error
-        const currentUser = App.auth.currentUser;
-        if (currentUser) {
-          console.log("✅ User found after error catch");
-          this.currentUser = currentUser;
-          App.currentUser = currentUser;
-          
-          localStorage.removeItem('authRedirect');
-          localStorage.removeItem('authTimestamp');
-          localStorage.removeItem('pendingGoogleAuth');
-          
-          window.location.href = AppUrl.to(returnPage);
-          return true;
-        }
-        
-        return false;
-      }
     },
 
     passwordStrength(password) {
@@ -239,14 +166,14 @@
       });
 
       try {
-        // Selalu gunakan LOCAL persistence
+        // SELALU gunakan LOCAL persistence
         await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
       } catch (err) {
         console.error("Failed to set persistence:", err);
       }
 
-      // Set flag bahwa kita sedang menunggu Google auth
-      localStorage.setItem('pendingGoogleAuth', 'true');
+      // Set flag bahwa kita sedang dalam proses Google redirect
+      localStorage.setItem('googleRedirectInProgress', 'true');
       localStorage.setItem('authTimestamp', Date.now().toString());
 
       // DI MOBILE, SELALU GUNAKAN REDIRECT
@@ -254,11 +181,11 @@
         console.log("📱 Mobile detected, using redirect method");
         try {
           await App.auth.signInWithRedirect(provider);
-          console.log("Redirect initiated, waiting for return...");
+          console.log("Redirect to Google initiated...");
           return null; // User akan di-redirect ke Google
         } catch (err) {
           console.error("Google redirect failed:", err);
-          localStorage.removeItem('pendingGoogleAuth');
+          localStorage.removeItem('googleRedirectInProgress');
           localStorage.removeItem('authTimestamp');
           throw err;
         }
@@ -270,7 +197,7 @@
         const result = await App.auth.signInWithPopup(provider);
         this.currentUser = result.user;
         App.currentUser = result.user;
-        localStorage.removeItem('pendingGoogleAuth');
+        localStorage.removeItem('googleRedirectInProgress');
         localStorage.removeItem('authTimestamp');
         console.log("✅ Popup login successful");
         return this.currentUser;
@@ -285,13 +212,13 @@
             await App.auth.signInWithRedirect(provider);
             return null;
           } catch (redirectErr) {
-            localStorage.removeItem('pendingGoogleAuth');
+            localStorage.removeItem('googleRedirectInProgress');
             localStorage.removeItem('authTimestamp');
             throw redirectErr;
           }
         }
         
-        localStorage.removeItem('pendingGoogleAuth');
+        localStorage.removeItem('googleRedirectInProgress');
         localStorage.removeItem('authTimestamp');
         throw err;
       }
@@ -302,12 +229,14 @@
         hasAuth: !!App.auth,
         currentUser: App.auth?.currentUser?.email,
         currentUserDisplayName: App.auth?.currentUser?.displayName,
-        persistence: App.auth?.currentUser ? 'logged in' : 'not logged in',
+        isLoggedIn: !!App.auth?.currentUser,
         platform: navigator.userAgent,
         isMobile: this.isMobileBrowser(),
+        googleRedirectInProgress: localStorage.getItem('googleRedirectInProgress'),
         pendingGoogleAuth: localStorage.getItem('pendingGoogleAuth'),
         authRedirect: localStorage.getItem('authRedirect'),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        currentUrl: window.location.href
       };
       console.log("🔍 Auth State Debug:", info);
       return info;
@@ -315,6 +244,41 @@
   };
 
   window.Auth = Auth;
+
+  /* ============================================
+     🔑 ROOT DOMAIN HANDLER
+     Redirect ke index.html jika user mengakses root domain
+     ============================================ */
+  function handleRootDomain() {
+    const currentPath = window.location.pathname;
+    const currentUrl = window.location.href;
+    
+    console.log("📍 Current URL:", currentUrl);
+    console.log("📍 Current path:", currentPath);
+    
+    // Cek apakah user mengakses root domain atau "/"
+    const isRootDomain = currentPath === '/' || 
+                        currentPath === '' || 
+                        currentPath === '/index.html' ||
+                        currentPath.endsWith('/');
+    
+    // Cek apakah ada parameter atau hash
+    const hasParams = window.location.search || window.location.hash;
+    
+    // Cek apakah ini dari Google OAuth redirect
+    const isGoogleCallback = window.location.search.includes('oauth') || 
+                            window.location.search.includes('code=') ||
+                            window.location.search.includes('state=');
+    
+    // Jika root domain dan bukan Google callback, redirect ke index.html
+    if (isRootDomain && !isGoogleCallback && !hasParams) {
+      console.log("🏠 Root domain detected, redirecting to index.html");
+      window.location.replace(AppUrl.to("index.html"));
+      return true;
+    }
+    
+    return false;
+  }
 
   /* ============================================
      Login Page Logic
@@ -372,12 +336,13 @@
           const result = await Auth.loginWithGoogle(false);
           
           if (!result) {
-            // Mobile: sedang redirect
+            // Mobile: sedang redirect ke Google
             googleBtn.innerHTML = "Menunggu Google...";
+            // Jangan reset button, biarkan user tahu sedang proses
             return;
           }
           
-          // Desktop: berhasil
+          // Desktop: berhasil login
           Toast.success("Login dengan Google berhasil! Mengarahkan ke dashboard...");
           setTimeout(() => {
             window.location.href = AppUrl.to("dashboard.html");
@@ -540,7 +505,7 @@
               await Auth.logout();
               Toast.success("Anda berhasil keluar");
               setTimeout(() => {
-                window.location.href = AppUrl.to("login.html");
+                window.location.href = AppUrl.to("index.html"); // Redirect ke index, bukan login
               }, 500);
             } catch (err) {
               Toast.error("Gagal logout");
@@ -622,8 +587,93 @@
   }
 
   /* ============================================
-     🔑 MAIN FIX: Auth State Observer
-     Ini adalah kunci utama untuk mobile redirect
+     🔑 GOOGLE REDIRECT HANDLER - Mobile Fix
+     ============================================ */
+  async function handleGoogleRedirectCallback() {
+    console.log("🔍 Checking for Google OAuth callback...");
+    console.log("Current URL:", window.location.href);
+    
+    // Cek apakah URL mengandung parameter OAuth dari Google
+    const hasOAuthParams = window.location.search.includes('code=') || 
+                          window.location.search.includes('state=') ||
+                          window.location.search.includes('oauth');
+    
+    if (!hasOAuthParams) {
+      console.log("Not a Google OAuth callback, skipping");
+      return false;
+    }
+
+    console.log("✅ Google OAuth callback detected!");
+
+    // Tunggu App.auth siap
+    let attempts = 0;
+    while (!window.App?.auth && attempts < 100) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+
+    if (!window.App?.auth) {
+      console.error("❌ App.auth not ready for redirect handling");
+      return false;
+    }
+
+    try {
+      // Ambil redirect result
+      const result = await App.auth.getRedirectResult();
+      console.log("Redirect result:", result);
+      
+      if (result.user) {
+        console.log("✅ User authenticated via Google redirect:", result.user.email);
+        
+        // Set current user
+        Auth.currentUser = result.user;
+        App.currentUser = result.user;
+        
+        // Bersihkan flags
+        localStorage.removeItem('googleRedirectInProgress');
+        localStorage.removeItem('pendingGoogleAuth');
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
+        
+        // Redirect ke dashboard
+        console.log("Redirecting to dashboard...");
+        setTimeout(() => {
+          window.location.replace(AppUrl.to("dashboard.html"));
+        }, 300);
+        
+        return true;
+      } else {
+        console.log("No user in redirect result");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error handling Google redirect:", err);
+      
+      // Fallback: cek currentUser
+      const currentUser = App.auth.currentUser;
+      if (currentUser) {
+        console.log("✅ Fallback: User found in currentUser");
+        Auth.currentUser = currentUser;
+        App.currentUser = currentUser;
+        
+        localStorage.removeItem('googleRedirectInProgress');
+        localStorage.removeItem('pendingGoogleAuth');
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
+        
+        setTimeout(() => {
+          window.location.replace(AppUrl.to("dashboard.html"));
+        }, 300);
+        
+        return true;
+      }
+      
+      return false;
+    }
+  }
+
+  /* ============================================
+     🔑 AUTH STATE OBSERVER
      ============================================ */
   function initAuthStateObserver() {
     console.log("👁️ Setting up auth state observer...");
@@ -633,16 +683,17 @@
       return;
     }
 
-    // Remove any existing observers to avoid duplicates
+    // Remove existing observer
     if (window._authObserver) {
       window._authObserver();
     }
 
-    // Setup persistent auth state listener
-    window._authObserver = App.auth.onAuthStateChanged(async (user) => {
+    window._authObserver = App.auth.onAuthStateChanged((user) => {
       console.log("🔄 Auth state changed:", {
         user: user?.email,
-        timestamp: new Date().toISOString()
+        isLoggedIn: !!user,
+        timestamp: new Date().toISOString(),
+        currentPath: window.location.pathname
       });
 
       Auth.currentUser = user;
@@ -651,52 +702,48 @@
       if (user) {
         console.log("✅ User is logged in");
         
-        // Cek apakah ini halaman auth (login/register)
+        // Cek apakah di halaman auth (login/register)
         const isAuthPage = document.getElementById("loginForm") || 
                           document.getElementById("registerForm");
         
-        if (isAuthPage) {
-          console.log("📍 On auth page, checking redirect flags...");
+        // Cek apakah ada Google redirect in progress
+        const googleRedirectInProgress = localStorage.getItem('googleRedirectInProgress');
+        
+        if (isAuthPage && googleRedirectInProgress) {
+          console.log("🎯 Google redirect completed, redirecting to dashboard...");
           
-          // Cek apakah ada flag pending Google auth
-          const pendingGoogle = localStorage.getItem('pendingGoogleAuth');
-          const timestamp = localStorage.getItem('authTimestamp');
+          // Bersihkan flags
+          localStorage.removeItem('googleRedirectInProgress');
+          localStorage.removeItem('pendingGoogleAuth');
+          localStorage.removeItem('authRedirect');
+          localStorage.removeItem('authTimestamp');
           
-          if (pendingGoogle || timestamp) {
-            console.log("🎯 Pending Google auth detected, redirecting to dashboard...");
-            
-            // Bersihkan flags
-            localStorage.removeItem('pendingGoogleAuth');
-            localStorage.removeItem('authRedirect');
-            localStorage.removeItem('authTimestamp');
-            
-            // Redirect ke dashboard
-            const dashboardUrl = AppUrl.to("dashboard.html");
-            console.log("Redirecting to:", dashboardUrl);
-            
-            // Gunakan setTimeout untuk memastikan state tersimpan
-            setTimeout(() => {
-              window.location.replace(dashboardUrl);
-            }, 500);
-          } else {
-            console.log("ℹ️ No pending auth flags, staying on auth page");
-          }
-        } else {
-          console.log("📍 On non-auth page, user is logged in");
-          // Render user info jika diperlukan
-          if (typeof window.renderUserInfo === 'function') {
-            window.renderUserInfo();
-          }
+          // Redirect ke dashboard
+          setTimeout(() => {
+            window.location.replace(AppUrl.to("dashboard.html"));
+          }, 500);
+        } else if (isAuthPage) {
+          console.log("ℹ️ On auth page, user logged in but no redirect flag");
+        }
+        
+        // Render user info
+        if (typeof window.renderUserInfo === 'function') {
+          window.renderUserInfo();
         }
       } else {
         console.log("❌ No user logged in");
         
-        // Jika tidak di halaman auth, redirect ke login
+        // Jika di halaman yang perlu auth (dashboard), redirect ke login
+        const isProtectedPage = window.location.pathname.includes('dashboard') ||
+                               window.location.pathname.includes('transactions') ||
+                               window.location.pathname.includes('budget') ||
+                               window.location.pathname.includes('goals');
+        
         const isAuthPage = document.getElementById("loginForm") || 
                           document.getElementById("registerForm");
         
-        if (!isAuthPage) {
-          console.log("🔒 User not authenticated, redirecting to login...");
+        if (isProtectedPage && !isAuthPage) {
+          console.log("🔒 Protected page detected, redirecting to login...");
           window.location.replace(AppUrl.to("login.html"));
         }
       }
@@ -708,12 +755,27 @@
   }
 
   /* ============================================
-     Init Function - Runs when DOM is ready
+     INITIALIZATION
      ============================================ */
   async function initializeAuth() {
     console.log("🚀 Initializing auth module...");
     console.log("Platform:", navigator.userAgent);
     console.log("Current URL:", window.location.href);
+    console.log("Path:", window.location.pathname);
+    
+    // 🔑 Handle root domain dulu
+    const isRootRedirected = handleRootDomain();
+    if (isRootRedirected) {
+      console.log("Redirected from root, stopping further initialization");
+      return;
+    }
+    
+    // 🔑 Handle Google OAuth callback
+    const isGoogleCallback = await handleGoogleRedirectCallback();
+    if (isGoogleCallback) {
+      console.log("Google callback handled, stopping further initialization");
+      return;
+    }
     
     // Wait for App.auth to be ready
     let attempts = 0;
@@ -737,45 +799,30 @@
     initRegisterPage();
     initLogoutButtons();
 
-    // Setup auth state observer - THIS IS THE KEY
+    // Setup auth state observer
     initAuthStateObserver();
 
-    // Check for redirect result
+    // Check if user is already logged in
+    const currentUser = App.auth.currentUser;
     const isAuthPage = document.getElementById("loginForm") || 
                       document.getElementById("registerForm");
     
-    if (isAuthPage) {
-      console.log("📍 On auth page, checking for redirect result...");
+    if (currentUser && isAuthPage) {
+      console.log("👤 User already logged in on auth page");
       
-      // Try to get redirect result
-      try {
-        const result = await App.auth.getRedirectResult();
-        console.log("Redirect check complete:", {
-          hasUser: !!result.user,
-          email: result.user?.email
-        });
+      // Cek flag Google redirect
+      const googleRedirectInProgress = localStorage.getItem('googleRedirectInProgress');
+      
+      if (googleRedirectInProgress) {
+        console.log("🎯 Google redirect flag found, redirecting to dashboard...");
+        localStorage.removeItem('googleRedirectInProgress');
+        localStorage.removeItem('pendingGoogleAuth');
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
         
-        if (result.user) {
-          console.log("✅ Redirect user found, observer will handle redirect");
-          // Observer akan menangani redirect ini
-        }
-      } catch (err) {
-        console.log("No redirect result found (this is normal for non-redirect visits):", err.code);
-      }
-      
-      // Double check: if user is already logged in and we're on auth page
-      if (App.auth.currentUser) {
-        console.log("👤 User already logged in on auth page");
-        const pendingGoogle = localStorage.getItem('pendingGoogleAuth');
-        if (pendingGoogle) {
-          console.log("🎯 Pending Google auth flag found, redirecting...");
-          localStorage.removeItem('pendingGoogleAuth');
-          localStorage.removeItem('authRedirect');
-          localStorage.removeItem('authTimestamp');
-          setTimeout(() => {
-            window.location.replace(AppUrl.to("dashboard.html"));
-          }, 500);
-        }
+        setTimeout(() => {
+          window.location.replace(AppUrl.to("dashboard.html"));
+        }, 500);
       }
     }
 
@@ -787,17 +834,17 @@
     console.log("✅ Auth module initialization complete");
   }
 
-  // Start initialization when DOM is ready
+  // Start initialization
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAuth);
   } else {
-    // DOM already loaded
     initializeAuth();
   }
 
   // Export functions
   window.renderUserInfo = renderUserInfo;
   window.mapAuthError = mapAuthError;
-  window.initAuthStateObserver = initAuthStateObserver;
+  window.handleRootDomain = handleRootDomain;
+  window.handleGoogleRedirectCallback = handleGoogleRedirectCallback;
   
 })();
