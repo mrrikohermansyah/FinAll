@@ -9,13 +9,14 @@ const authDomainByHost = {
   localhost: "localhost",
   "127.0.0.1": "127.0.0.1",
   "192.168.7.144": "192.168.7.144",
-  "finall.futureproject.my.id": "finall-b5c2e.firebaseapp.com",
-  "www.futureproject.my.id": "finall-b5c2e.firebaseapp.com",
+  "app.futureproject.my.id": "app.futureproject.my.id",
+  "finall.futureproject.my.id": "app.futureproject.my.id",
+  "www.futureproject.my.id": "app.futureproject.my.id",
 };
 
 const firebaseConfig = {
   apiKey: "AIzaSyCsh9_5bv_U7E9slwxDzAMQRXNiubaMfZw",
-  authDomain: "finall-b5c2e.firebaseapp.com",
+  authDomain: "app.futureproject.my.id",
   projectId: "finall-b5c2e",
   storageBucket: "finall-b5c2e.firebasestorage.app",
   messagingSenderId: "813686056225",
