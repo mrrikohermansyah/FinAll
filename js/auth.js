@@ -1,6 +1,7 @@
 /* ============================================
    Authentication Module
-   Personal Financial Allocation v1.0.0
+   Personal Financial Allocation v1.0.1
+   Fixed: iOS/Android redirect issue
    ============================================ */
 
 (function () {
@@ -59,6 +60,9 @@
     async logout() {
       await App.auth.signOut();
       this.currentUser = null;
+      // Bersihkan localStorage saat logout
+      localStorage.removeItem('authRedirect');
+      localStorage.removeItem('authTimestamp');
     },
 
     async forgotPassword(email) {
@@ -99,16 +103,56 @@
     },
 
     async handleGoogleRedirect(returnPage = "dashboard.html") {
+      console.log("handleGoogleRedirect called", {
+        hasAuth: !!App.auth,
+        time: new Date().toISOString(),
+        platform: navigator.userAgent
+      });
+
       try {
+        // Pastikan App.auth sudah siap
+        if (!App.auth) {
+          console.error("App.auth not initialized");
+          return false;
+        }
+
         const redirectResult = await App.auth.getRedirectResult();
+        console.log("Redirect result:", {
+          hasUser: !!redirectResult?.user,
+          user: redirectResult?.user?.email,
+          credential: !!redirectResult?.credential
+        });
+
         if (redirectResult?.user) {
           this.currentUser = redirectResult.user;
           App.currentUser = redirectResult.user;
+          
+          // Simpan state untuk backup
+          localStorage.setItem('authRedirect', 'true');
+          localStorage.setItem('authTimestamp', Date.now().toString());
+          
+          console.log("Redirecting to:", returnPage);
+          
+          // Gunakan replace untuk menghindari back button ke halaman redirect
           window.location.replace(AppUrl.to(returnPage));
           return true;
         }
       } catch (err) {
-        console.warn("Google redirect result error:", err);
+        console.error("Google redirect result error:", err);
+        
+        // Coba alternatif: cek currentUser langsung
+        try {
+          const currentUser = App.auth.currentUser;
+          if (currentUser) {
+            console.log("Found currentUser after redirect error:", currentUser.email);
+            this.currentUser = currentUser;
+            App.currentUser = currentUser;
+            window.location.replace(AppUrl.to(returnPage));
+            return true;
+          }
+        } catch (e) {
+          console.error("Fallback check failed:", e);
+        }
       }
       return false;
     },
@@ -160,33 +204,88 @@
           "GoogleAuthProvider tidak tersedia. Pastikan Firebase Auth SDK sudah dimuat.",
         );
       }
+      
       const provider = new firebase.auth.GoogleAuthProvider();
       provider.addScope("profile");
       provider.addScope("email");
 
-      if (this.isMobileBrowser()) {
-        provider.setCustomParameters({ prompt: "select_account" });
-      }
-
-      await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-      const shouldUseRedirect = useRedirect || this.isMobileBrowser();
-
-      if (shouldUseRedirect) {
-        await App.auth.signInWithRedirect(provider);
-        return null;
+      const isMobile = this.isMobileBrowser();
+      
+      // Selalu set prompt untuk mobile
+      if (isMobile) {
+        provider.setCustomParameters({ 
+          prompt: "select_account"
+        });
       }
 
       try {
+        // Selalu gunakan LOCAL persistence untuk mobile
+        await App.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch (err) {
+        console.error("Failed to set persistence:", err);
+      }
+
+      // Simpan flag redirect di localStorage
+      localStorage.setItem('authRedirect', 'true');
+      localStorage.setItem('authTimestamp', Date.now().toString());
+
+      // Di mobile, SELALU gunakan redirect
+      if (isMobile) {
+        console.log("Mobile detected, using redirect method");
+        try {
+          await App.auth.signInWithRedirect(provider);
+          return null; // Akan redirect, tidak ada return value
+        } catch (err) {
+          console.error("Google redirect failed:", err);
+          localStorage.removeItem('authRedirect');
+          localStorage.removeItem('authTimestamp');
+          throw err;
+        }
+      }
+
+      // Untuk desktop, coba popup dulu
+      try {
         const result = await App.auth.signInWithPopup(provider);
         this.currentUser = result.user;
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
         return this.currentUser;
       } catch (err) {
-        console.warn("Google popup auth failed, retrying via redirect:", err);
-        await App.auth.signInWithRedirect(provider);
-        return null;
+        console.warn("Google popup failed, trying redirect:", err);
+        
+        // Jika popup gagal (diblokir, dll), fallback ke redirect
+        if (err.code === 'auth/popup-blocked' || 
+            err.code === 'auth/popup-closed-by-user' ||
+            err.code === 'auth/cancelled-popup-request') {
+          try {
+            await App.auth.signInWithRedirect(provider);
+            return null;
+          } catch (redirectErr) {
+            console.error("Fallback redirect also failed:", redirectErr);
+            localStorage.removeItem('authRedirect');
+            localStorage.removeItem('authTimestamp');
+            throw redirectErr;
+          }
+        }
+        
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
+        throw err;
       }
     },
+
+    // Method debug
+    debugAuthState() {
+      console.log("Auth State Debug:", {
+        hasAuth: !!App.auth,
+        currentUser: App.auth?.currentUser?.email,
+        persistence: App.auth?.persistence,
+        platform: navigator.userAgent,
+        isMobile: this.isMobileBrowser(),
+        hasRedirectFlag: localStorage.getItem('authRedirect'),
+        timestamp: new Date().toISOString()
+      });
+    }
   };
 
   window.Auth = Auth;
@@ -242,13 +341,20 @@
         const prev = googleBtn.innerHTML;
         googleBtn.disabled = true;
         googleBtn.dataset.redirecting = "false";
-        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Mengalihkan ke Google...`;
+        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Menghubungkan ke Google...`;
+        
         try {
           const result = await Auth.loginWithGoogle(false);
+          
+          // Jika null, berarti menggunakan redirect (mobile/safari)
           if (!result) {
             googleBtn.dataset.redirecting = "true";
+            // Tampilkan pesan menunggu redirect
+            googleBtn.innerHTML = "Menunggu Google...";
             return;
           }
+          
+          // Jika berhasil dengan popup (desktop)
           Toast.success(
             "Login dengan Google berhasil! Mengarahkan ke dashboard...",
           );
@@ -257,7 +363,10 @@
           }, 800);
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Login Google");
+          googleBtn.disabled = false;
+          googleBtn.innerHTML = prev;
         } finally {
+          // Hanya reset jika tidak redirecting
           if (googleBtn.dataset.redirecting !== "true") {
             googleBtn.disabled = false;
             googleBtn.innerHTML = prev;
@@ -335,13 +444,19 @@
         const prev = googleBtn.innerHTML;
         googleBtn.disabled = true;
         googleBtn.dataset.redirecting = "false";
-        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Mengalihkan ke Google...`;
+        googleBtn.innerHTML = `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;animation:spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg> Menghubungkan ke Google...`;
+        
         try {
           const result = await Auth.loginWithGoogle(false);
+          
+          // Jika null, berarti menggunakan redirect (mobile/safari)
           if (!result) {
             googleBtn.dataset.redirecting = "true";
+            googleBtn.innerHTML = "Menunggu Google...";
             return;
           }
+          
+          // Jika berhasil dengan popup (desktop)
           Toast.success(
             "Daftar dengan Google berhasil! Mengarahkan ke dashboard...",
           );
@@ -350,6 +465,8 @@
           }, 1200);
         } catch (err) {
           Toast.error(mapAuthError(err), "Gagal Daftar Google");
+          googleBtn.disabled = false;
+          googleBtn.innerHTML = prev;
         } finally {
           if (googleBtn.dataset.redirecting !== "true") {
             googleBtn.disabled = false;
@@ -501,33 +618,129 @@
   }
 
   /* ============================================
+     Check Pending Google Redirect
+     ============================================ */
+  async function checkPendingGoogleRedirect() {
+    const isAuthPage =
+      document.getElementById("loginForm") || document.getElementById("registerForm");
+    
+    if (!isAuthPage) {
+      console.log("Not on auth page, skipping redirect check");
+      return;
+    }
+
+    console.log("Checking pending Google redirect...");
+
+    // Tunggu App.auth siap dengan timeout lebih panjang untuk mobile
+    let tries = 0;
+    const maxTries = 50; // Tingkatkan untuk mobile yang lambat
+    
+    while (!window.App?.auth && tries < maxTries) {
+      await new Promise((r) => setTimeout(r, 200));
+      tries++;
+      if (tries % 10 === 0) {
+        console.log(`Still waiting for App.auth... (attempt ${tries}/${maxTries})`);
+      }
+    }
+    
+    if (!window.App?.auth) {
+      console.error("Firebase Auth not initialized after", maxTries, "attempts");
+      // Coba method alternatif
+      await checkAlternativeRedirect();
+      return;
+    }
+
+    console.log("App.auth ready, handling redirect...");
+    Auth.debugAuthState();
+
+    try {
+      const handled = await Auth.handleGoogleRedirect("dashboard.html");
+      if (!handled) {
+        console.log("No redirect result found, checking localStorage backup...");
+        await checkAlternativeRedirect();
+      }
+    } catch (err) {
+      console.error("Error handling redirect:", err);
+      await checkAlternativeRedirect();
+    }
+  }
+
+  // Backup method untuk cek redirect via localStorage & currentUser
+  async function checkAlternativeRedirect() {
+    console.log("Running alternative redirect check...");
+    
+    // Cek localStorage
+    const wasRedirected = localStorage.getItem('authRedirect');
+    const timestamp = localStorage.getItem('authTimestamp');
+    
+    if (wasRedirected && timestamp) {
+      const elapsed = Date.now() - parseInt(timestamp);
+      console.log(`Redirect flag found, elapsed: ${elapsed}ms`);
+      
+      if (elapsed < 300000) { // 5 menit
+        console.log("Recent redirect detected, checking auth state...");
+        
+        // Tunggu sebentar untuk memastikan auth state terupdate
+        await new Promise((r) => setTimeout(r, 1000));
+        
+        if (App.auth?.currentUser) {
+          console.log("User found via backup check, redirecting...");
+          localStorage.removeItem('authRedirect');
+          localStorage.removeItem('authTimestamp');
+          window.location.replace(AppUrl.to("dashboard.html"));
+          return;
+        }
+        
+        // Cek lagi dengan onAuthStateChanged
+        App.auth?.onAuthStateChanged((user) => {
+          if (user) {
+            console.log("User found via onAuthStateChanged, redirecting...");
+            localStorage.removeItem('authRedirect');
+            localStorage.removeItem('authTimestamp');
+            window.location.replace(AppUrl.to("dashboard.html"));
+          }
+        });
+      } else {
+        // Expired
+        localStorage.removeItem('authRedirect');
+        localStorage.removeItem('authTimestamp');
+      }
+    }
+  }
+
+  /* ============================================
      Init Pages
      ============================================ */
-  
-  async function checkPendingGoogleRedirect() {
-  const isAuthPage =
-    document.getElementById("loginForm") || document.getElementById("registerForm");
-  if (!isAuthPage) return;
-
-  // tunggu App.auth siap (init Firebase kadang belum selesai saat DOMContentLoaded)
-  let tries = 0;
-  while (!window.App?.auth && tries < 20) {
-    await new Promise((r) => setTimeout(r, 100));
-    tries++;
-  }
-  if (!window.App?.auth) return;
-
-  await Auth.handleGoogleRedirect("dashboard.html");
-}
   document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOMContentLoaded - Initializing auth module...");
+    
     initLoginPage();
     initRegisterPage();
     initLogoutButtons();
-    checkPendingGoogleRedirect();
-
+    
+    // Jalankan redirect check dengan delay kecil untuk mobile
+    setTimeout(() => {
+      checkPendingGoogleRedirect().catch(err => {
+        console.error("Failed to check redirect:", err);
+      });
+    }, 300);
+    
     if (typeof onAuthPagesReady === "function") onAuthPagesReady();
   });
 
+  // Backup: jalankan juga saat window.load untuk memastikan
+  window.addEventListener("load", () => {
+    console.log("Window loaded - Running delayed redirect check...");
+    
+    setTimeout(() => {
+      checkPendingGoogleRedirect().catch(err => {
+        console.error("Delayed redirect check failed:", err);
+      });
+    }, 1500);
+  });
+
+  // Export functions
   window.renderUserInfo = renderUserInfo;
   window.mapAuthError = mapAuthError;
+  window.checkPendingGoogleRedirect = checkPendingGoogleRedirect;
 })();
