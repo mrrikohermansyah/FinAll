@@ -1,16 +1,16 @@
 {
-  "version": "1.6.7",
-  "build": "013.006",
+  "version": "1.6.8",
+  "build": "013.007",
   "releaseDate": "2026-08-04",
-  "releaseNote": "Mobile UI Optimization - Reports Page",
+  "releaseNote": "Mobile UI Optimization - Transaction Form",
   "changes": [
-    "Fixed reports page horizontal scrolling issue on mobile devices",
-    "Removed forced table min-width that caused horizontal overflow",
-    "Optimized table layout to use card-based design on mobile screens",
-    "Added proper data-label attributes for mobile table transformation",
-    "Added overflow protection to prevent horizontal scrolling",
-    "Improved responsive grid layouts for summary cards and charts",
-    "Enhanced filter bar responsiveness for mobile devices",
-    "Reports page now displays properly on mobile without horizontal swipe"
+    "Fixed transaction form modal horizontal scrolling issue on mobile devices",
+    "Added overflow protection to prevent horizontal scrolling in modal",
+    "Optimized modal layout with full-width design on mobile screens",
+    "Improved form field stacking and spacing for mobile touch interaction",
+    "Enhanced checkbox group layout to wrap properly on small screens",
+    "Added proper touch targets and padding for mobile usability",
+    "Implemented safe area support for devices with notches/home indicators",
+    "Transaction edit form now displays properly on mobile without horizontal swipe"
   ]
 }
