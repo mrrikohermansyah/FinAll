@@ -1,16 +1,11 @@
 {
   "version": "1.6.0",
-  "build": "013.001",
+  "build": "013.002",
   "releaseDate": "2026-08-04",
-  "releaseNote": "Mobile UI/UX Optimization",
+  "releaseNote": "CSS Progress Bar Fix",
   "changes": [
-    "Added PWA manifest for app installation",
-    "Implemented mobile bottom navigation",
-    "Enhanced touch interactions and gestures",
-    "Optimized form inputs for mobile keyboards",
-    "Added responsive breakpoints for tablets and phones",
-    "Improved mobile-specific CSS and safe area support",
-    "Enhanced service worker caching for mobile",
-    "Added reduced motion support for accessibility"
+    "Fixed CSS class conflict in progress payment card",
+    "Renamed progress bar container to progress-container",
+    "Updated CSS rules to support new class name"
   ]
 }

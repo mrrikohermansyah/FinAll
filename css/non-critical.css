@@ -300,7 +300,8 @@
 }
 
 /* Progress Bar Styles */
-.progress {
+.progress,
+.progress-container {
   width: 100%;
   height: 8px;
   background: var(--surface-alt);

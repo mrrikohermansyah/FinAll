@@ -1170,7 +1170,8 @@ select.form-control {
 /* ============================================
    Progress Bar
    ============================================ */
-.progress {
+.progress,
+.progress-container {
   height: 8px;
   background: var(--surface-alt);
   border-radius: var(--radius-full);
@@ -1892,8 +1893,6 @@ select.form-control {
     right: 0;
     padding: 0 20px;
   }
-}
-  }
 
   .btn {
     min-height: 48px;
@@ -1988,7 +1987,7 @@ select.form-control {
     width: 44px;
     height: 44px;
   }
-}
+
 
 @media (max-width: 480px) {
   .page-title {
