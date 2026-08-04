@@ -390,7 +390,8 @@
           Toast.error('Gagal menghapus transaksi');
         }
       },
-      'Hapus Transaksi'
+      'Hapus Transaksi',
+      'Ya, Hapus'
     );
   };
 

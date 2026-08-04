@@ -227,23 +227,35 @@ body {
   z-index: 100000;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .toast {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 14px 18px;
+  gap: 14px;
+  padding: 16px 20px;
   background: var(--surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  border-left: 4px solid var(--primary);
-  min-width: 300px;
-  max-width: 400px;
+  border: 1px solid var(--border);
+  min-width: 320px;
+  max-width: 420px;
   opacity: 0;
   transform: translateX(100%);
   transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary);
 }
 
 .toast.show {
@@ -251,41 +263,44 @@ body {
   transform: translateX(0);
 }
 
-.toast.success {
-  border-left-color: var(--success);
+.toast.success::before {
+  background: var(--success);
 }
 
-.toast.error {
-  border-left-color: var(--danger);
+.toast.error::before {
+  background: var(--danger);
 }
 
-.toast.warning {
-  border-left-color: var(--warning);
+.toast.warning::before {
+  background: var(--warning);
 }
 
 .toast-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   flex-shrink: 0;
+  border-radius: 50%;
 }
 
 .toast-content {
   flex: 1;
+  min-width: 0;
 }
 
 .toast-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .toast-message {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .toast-close {
@@ -293,10 +308,22 @@ body {
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1;
   padding: 0;
-  margin-left: 8px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  opacity: 0.4;
+  transition: opacity var(--transition-fast);
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: var(--surface-alt);
 }
 
 /* Modal - Critical */

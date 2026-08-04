@@ -503,13 +503,32 @@ const Toast = {
         <div class="toast-message">${Sanitize.string(message, 200)}</div>
       </div>
       <button class="toast-close" aria-label="Close">×</button>
+      <div class="toast-progress" style="animation-duration: ${duration}ms"></div>
     `;
     this.container.appendChild(toast);
-    setTimeout(() => toast.classList.add("show"), 10);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+      setTimeout(() => toast.classList.add("show"), 10);
+    });
+    
     toast
       .querySelector(".toast-close")
       .addEventListener("click", () => this._remove(toast));
-    setTimeout(() => this._remove(toast), duration);
+    
+    // Auto-remove after duration
+    const timeoutId = setTimeout(() => this._remove(toast), duration);
+    
+    // Pause progress on hover
+    toast.addEventListener('mouseenter', () => {
+      toast.querySelector('.toast-progress').style.animationPlayState = 'paused';
+      clearTimeout(timeoutId);
+    });
+    
+    toast.addEventListener('mouseleave', () => {
+      toast.querySelector('.toast-progress').style.animationPlayState = 'running';
+      setTimeout(() => this._remove(toast), 500);
+    });
   },
   _remove(toast) {
     toast.classList.remove("show");
@@ -581,20 +600,20 @@ const Modal = {
     return { overlay, modal, close };
   },
 
-  confirm(message, onConfirm, title = "Konfirmasi") {
+  confirm(message, onConfirm, title = "Konfirmasi", confirmText = "Ya, Lanjutkan") {
     const { modal, close } = this.create({
       title,
       className: "confirm-dialog",
       content: `
         <div class="confirm-icon">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         </div>
         <div class="confirm-title">${title}</div>
         <div class="confirm-desc">${Sanitize.string(message, 300)}</div>
       `,
       footer: `
         <button class="btn btn-secondary" data-action="cancel">Batal</button>
-        <button class="btn btn-danger" data-action="confirm">Ya, Keluar</button>
+        <button class="btn btn-danger" data-action="confirm">${confirmText}</button>
       `,
     });
 

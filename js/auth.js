@@ -481,7 +481,8 @@
               Toast.error("Gagal logout");
             }
           },
-          "Konfirmasi Keluar",
+          "Konfirmasi Logout",
+          "Ya, Keluar"
         );
       });
     });

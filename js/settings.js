@@ -201,7 +201,8 @@
           renderCategories();
         } catch (e) { Toast.error('Gagal menghapus kategori'); }
       },
-      'Hapus Kategori'
+      'Hapus Kategori',
+      'Ya, Hapus'
     );
   };
 
@@ -319,7 +320,8 @@
           renderAdminTable();
         } catch (e) { Toast.error('Gagal menghapus'); }
       },
-      'Hapus Admin Transaksi'
+      'Hapus Admin Transaksi',
+      'Ya, Hapus'
     );
   };
 
