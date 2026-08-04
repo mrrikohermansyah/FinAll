@@ -1,19 +1,16 @@
 {
-  "version": "1.6.6",
-  "build": "013.005",
+  "version": "1.6.7",
+  "build": "013.006",
   "releaseDate": "2026-08-04",
-  "releaseNote": "Mobile UI Optimization - Transaction Modal, Logout & Version Popup",
+  "releaseNote": "Mobile UI Optimization - Reports Page",
   "changes": [
-    "Optimized transaction edit modal for mobile devices with responsive form layouts",
-    "Converted inline styles in transaction modal to semantic CSS classes",
-    "Improved modal spacing and padding for mobile screens",
-    "Optimized confirmation dialog (logout) for mobile devices",
-    "Confirmation dialog now stays centered on mobile instead of bottom sheet",
-    "Optimized version/update popup for mobile devices",
-    "Version popup now stays centered on mobile instead of bottom sheet",
-    "Adjusted button sizes and spacing for better mobile touch targets",
-    "Improved text sizing and spacing for mobile dialogs",
-    "Added safe area insets for mobile device compatibility",
-    "All modals now properly optimized for mobile touch interactions"
+    "Fixed reports page horizontal scrolling issue on mobile devices",
+    "Removed forced table min-width that caused horizontal overflow",
+    "Optimized table layout to use card-based design on mobile screens",
+    "Added proper data-label attributes for mobile table transformation",
+    "Added overflow protection to prevent horizontal scrolling",
+    "Improved responsive grid layouts for summary cards and charts",
+    "Enhanced filter bar responsiveness for mobile devices",
+    "Reports page now displays properly on mobile without horizontal swipe"
   ]
 }

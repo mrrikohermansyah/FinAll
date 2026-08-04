@@ -519,7 +519,7 @@
         <td data-label="Nominal" class="table-cell-right">${IDR.format(amt)}</td>
         <td data-label="Admin" class="table-cell-right">${adm > 0 ? IDR.format(adm) : "-"}</td>
         <td data-label="Total" class="table-cell-right table-cell-bold">${IDR.format(total)}</td>
-        <td data-label="Persentase"><span class="badge badge-${Number((total / (salary || 1)) * 100) > 30 ? "danger" : Number((total / (salary || 1)) * 100) > 15 ? "warning" : "info"}">${pct}</span></td>
+        <td data-label="%"><span class="badge badge-${Number((total / (salary || 1)) * 100) > 30 ? "danger" : Number((total / (salary || 1)) * 100) > 15 ? "warning" : "info"}">${pct}</span></td>
         <td data-label="Status">${t.isPaid ? '<span class="badge badge-success">✓ Dibayar</span>' : '<span class="badge badge-secondary">Belum</span>'}</td>
       </tr>`;
     });
@@ -530,7 +530,7 @@
       <td data-label="Nominal" class="table-cell-right">${IDR.format(totalAmt)}</td>
       <td data-label="Admin" class="table-cell-right">${IDR.format(totalAdm)}</td>
       <td data-label="Total" class="table-cell-right table-cell-total">${IDR.format(totalAmt + totalAdm)}</td>
-      <td data-label="Persentase" colspan="2"></td>
+      <td data-label="%" colspan="2"></td>
     </tr>`;
     tbody.innerHTML = rows;
   }

@@ -130,16 +130,31 @@
          ============================================ */
 
       @media (max-width: 768px) {
+        /* Prevent horizontal overflow */
+        html, body {
+          overflow-x: hidden;
+          width: 100%;
+          max-width: 100%;
+        }
+        .main-content, .page-content {
+          overflow-x: hidden;
+          width: 100%;
+          max-width: 100%;
+        }
+
         /* Filter bar: stack everything full-width */
         .filter-bar {
           flex-direction: column;
           align-items: stretch;
           gap: 12px;
+          width: 100%;
+          max-width: 100%;
         }
         .filter-bar .form-control,
         .filter-select {
           max-width: none !important;
           width: 100%;
+          box-sizing: border-box;
         }
         .filter-bar .spacer {
           display: none;
@@ -148,23 +163,31 @@
           width: 100%;
           justify-content: space-between;
           flex-wrap: wrap;
+          gap: 8px;
         }
         .filter-actions .btn {
           flex: 1;
           justify-content: center;
           min-width: 120px;
+          white-space: nowrap;
         }
 
         /* Summary cards: responsive grid */
         .report-summary {
           grid-template-columns: repeat(2, 1fr) !important;
           gap: 12px;
+          width: 100%;
+          max-width: 100%;
         }
         .report-summary--secondary {
           grid-template-columns: repeat(2, 1fr) !important;
+          width: 100%;
+          max-width: 100%;
         }
         .report-card {
           padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
         }
         .report-card-value {
           font-size: 18px;
@@ -174,12 +197,17 @@
         .report-charts-grid {
           grid-template-columns: 1fr !important;
           gap: 16px;
+          width: 100%;
+          max-width: 100%;
         }
         .chart-card {
           padding: 20px;
+          width: 100%;
+          box-sizing: border-box;
         }
         .chart-container {
           height: 240px;
+          width: 100%;
         }
         .chart-card.full-width {
           grid-column: span 1 !important;
@@ -187,12 +215,13 @@
 
         /* Table: convert to card layout on mobile */
         .table-wrapper {
-          overflow-x: auto;
+          overflow-x: visible;
           -webkit-overflow-scrolling: touch;
         }
         .table {
           font-size: 12px;
-          min-width: 600px;
+          min-width: 100%;
+          width: 100%;
         }
         .table th,
         .table td {
@@ -215,6 +244,8 @@
           border-radius: var(--radius-md);
           padding: 16px;
           box-shadow: var(--shadow-sm);
+          width: 100%;
+          box-sizing: border-box;
         }
         /* Hide total row on mobile (already shown in summary cards) */
         #rptTable tr.table-row-total {
@@ -225,6 +256,8 @@
           justify-content: space-between;
           padding: 8px 0;
           border-bottom: 1px solid var(--surface-alt);
+          width: 100%;
+          box-sizing: border-box;
         }
         #rptTable td:last-child {
           border-bottom: none;
@@ -236,6 +269,7 @@
           margin-right: 12px;
           font-size: 11px;
           text-transform: uppercase;
+          flex-shrink: 0;
         }
         /* Handle empty state */
         #rptTable td[colspan="8"] {
@@ -252,6 +286,18 @@
       }
 
       @media (max-width: 480px) {
+        /* Ensure no horizontal overflow on very small screens */
+        html, body {
+          overflow-x: hidden !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        .main-content, .page-content, .app-layout {
+          overflow-x: hidden !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
         /* Summary cards: single column on very small screens */
         .report-summary {
           grid-template-columns: 1fr !important;
@@ -704,14 +750,14 @@
                 <table class="table" id="rptTable">
                   <thead>
                     <tr>
-                      <th>Tanggal</th>
-                      <th>Nama</th>
-                      <th>Kategori</th>
-                      <th>Nominal</th>
-                      <th>Admin</th>
-                      <th>Total</th>
-                      <th>%</th>
-                      <th>Status</th>
+                      <th data-label="Tanggal">Tanggal</th>
+                      <th data-label="Nama">Nama</th>
+                      <th data-label="Kategori">Kategori</th>
+                      <th data-label="Nominal">Nominal</th>
+                      <th data-label="Admin">Admin</th>
+                      <th data-label="Total">Total</th>
+                      <th data-label="%">%</th>
+                      <th data-label="Status">Status</th>
                     </tr>
                   </thead>
                   <tbody id="rptTableBody">
