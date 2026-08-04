@@ -1,16 +1,19 @@
 {
-  "version": "1.6.5",
-  "build": "013.004",
+  "version": "1.6.6",
+  "build": "013.005",
   "releaseDate": "2026-08-04",
-  "releaseNote": "Reports Page Styling Optimization",
+  "releaseNote": "Mobile UI Optimization - Transaction Modal, Logout & Version Popup",
   "changes": [
-    "Removed all inline styles from reports.html",
-    "Converted inline styles to semantic CSS classes",
-    "Fixed filter controls styling with proper CSS classes",
-    "Fixed report summary cards with color variant classes",
-    "Fixed table cell styling with CSS classes",
-    "Updated report.js to use CSS classes instead of inline styles",
-    "Improved responsive design consistency across all pages",
-    "Reports page now matches dashboard and transaction styling"
+    "Optimized transaction edit modal for mobile devices with responsive form layouts",
+    "Converted inline styles in transaction modal to semantic CSS classes",
+    "Improved modal spacing and padding for mobile screens",
+    "Optimized confirmation dialog (logout) for mobile devices",
+    "Confirmation dialog now stays centered on mobile instead of bottom sheet",
+    "Optimized version/update popup for mobile devices",
+    "Version popup now stays centered on mobile instead of bottom sheet",
+    "Adjusted button sizes and spacing for better mobile touch targets",
+    "Improved text sizing and spacing for mobile dialogs",
+    "Added safe area insets for mobile device compatibility",
+    "All modals now properly optimized for mobile touch interactions"
   ]
 }

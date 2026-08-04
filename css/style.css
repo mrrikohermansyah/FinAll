@@ -1793,6 +1793,111 @@ select.form-control {
   flex-shrink: 0;
 }
 
+/* Mobile Optimization for Version Popup */
+@media (max-width: 768px) {
+  .version-popup .modal-body {
+    padding: 24px 20px;
+  }
+
+  .version-badge {
+    padding: 6px 16px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .version-popup h3 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .version-date {
+    font-size: 12px;
+    margin-bottom: 20px;
+  }
+
+  .changelog-title {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .changelog-list {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+
+  .changelog-list li {
+    font-size: 12px;
+    padding: 5px 0;
+  }
+
+  .version-popup .modal-footer {
+    padding: 12px 20px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    gap: 12px;
+  }
+
+  .version-popup .btn {
+    flex: 1;
+    min-width: auto;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .version-popup .modal-body {
+    padding: 20px 16px;
+  }
+
+  .version-badge {
+    padding: 5px 14px;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .version-popup h3 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .version-date {
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+
+  .changelog-title {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .changelog-list {
+    padding: 10px;
+    margin-bottom: 16px;
+  }
+
+  .changelog-list li {
+    font-size: 11px;
+    padding: 4px 0;
+    line-height: 1.4;
+  }
+
+  .version-popup .modal-footer {
+    padding: 10px 16px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+
+  .version-popup .btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .version-popup .btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
 /* ============================================
    Responsive Styles
    ============================================ */
@@ -2067,6 +2172,50 @@ select.form-control {
   }
 
   .modal-overlay.show .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  /* Exception: Keep confirmation dialog centered on mobile */
+  .modal-overlay.confirm-dialog {
+    align-items: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.confirm-dialog .modal {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    transform: translateY(20px) scale(0.97);
+    max-height: 85vh;
+    margin: 0;
+    border-radius: var(--radius-lg);
+    min-height: auto;
+  }
+
+  .modal-overlay.confirm-dialog.show .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  /* Exception: Keep version popup centered on mobile */
+  .modal-overlay.version-popup {
+    align-items: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.version-popup .modal {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    transform: translateY(20px) scale(0.97);
+    max-height: 85vh;
+    margin: 0;
+    border-radius: var(--radius-lg);
+    min-height: auto;
+  }
+
+  .modal-overlay.version-popup.show .modal {
     transform: translateY(0) scale(1);
   }
 
@@ -2402,4 +2551,87 @@ select.form-control {
 
 .confirm-dialog .btn:active {
   transform: translateY(0);
+}
+
+/* Mobile Optimization for Confirmation Dialog */
+@media (max-width: 768px) {
+  .confirm-dialog {
+    padding: 16px 0;
+  }
+
+  .confirm-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  .confirm-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .confirm-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .confirm-desc {
+    font-size: 13px;
+    margin-bottom: 20px;
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .confirm-dialog .modal-footer {
+    gap: 12px;
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .confirm-dialog .btn {
+    min-width: 100px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .confirm-dialog {
+    padding: 12px 0;
+  }
+
+  .confirm-icon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 12px;
+  }
+
+  .confirm-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .confirm-title {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .confirm-desc {
+    font-size: 12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .confirm-dialog .modal-footer {
+    gap: 8px;
+    padding: 10px 12px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .confirm-dialog .btn {
+    min-width: 0;
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
 }

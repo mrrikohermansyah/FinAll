@@ -601,22 +601,45 @@ const Modal = {
   },
 
   confirm(message, onConfirm, title = "Konfirmasi", confirmText = "Ya, Lanjutkan") {
-    const { modal, close } = this.create({
-      title,
-      className: "confirm-dialog",
-      content: `
-        <div class="confirm-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay confirm-dialog";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">${title}</h3>
+          <button class="modal-close" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        <div class="confirm-title">${title}</div>
-        <div class="confirm-desc">${Sanitize.string(message, 300)}</div>
-      `,
-      footer: `
-        <button class="btn btn-secondary" data-action="cancel">Batal</button>
-        <button class="btn btn-danger" data-action="confirm">${confirmText}</button>
-      `,
+        <div class="modal-body">
+          <div class="confirm-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="confirm-title">${title}</div>
+          <div class="confirm-desc">${Sanitize.string(message, 300)}</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-action="cancel">Batal</button>
+          <button class="btn btn-danger" data-action="confirm">${confirmText}</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    const modal = overlay.querySelector(".modal");
+
+    const close = () => {
+      overlay.classList.remove("show");
+      setTimeout(() => {
+        overlay.remove();
+      }, 300);
+    };
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
     });
 
+    modal.querySelector(".modal-close").addEventListener("click", close);
     modal
       .querySelector('[data-action="cancel"]')
       .addEventListener("click", close);
@@ -626,6 +649,10 @@ const Modal = {
         close();
         if (onConfirm) onConfirm();
       });
+
+    setTimeout(() => overlay.classList.add("show"), 10);
+
+    return { overlay, modal, close };
   },
 
   alert(message, type = "info", title = "Informasi", onClose = null) {
@@ -651,25 +678,48 @@ const Modal = {
     const changes = (versionData.changes || [])
       .map((c) => `<li>${Sanitize.string(c)}</li>`)
       .join("");
-    const { modal, close } = this.create({
-      title: "Pembaruan Tersedia!",
-      size: "md",
-      className: "version-popup",
-      content: `
-        <div class="version-badge animate-bounce-in">Version ${Sanitize.string(versionData.version)}</div>
-        <h3>Ada Versi Baru!</h3>
-        <div class="version-date">Build ${Sanitize.string(versionData.build)} · ${Sanitize.string(versionData.releaseDate)}</div>
-        <div class="changelog-title">What's New:</div>
-        <ul class="changelog-list">${changes || `<li>Perbaikan dan peningkatan performa</li>`}</ul>
-      `,
-      footer: `
-        <button class="btn btn-secondary" data-action="later">Nanti Saja</button>
-        <button class="btn btn-primary" data-action="refresh">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-          Refresh Now
-        </button>
-      `,
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay version-popup";
+    overlay.innerHTML = `
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Pembaruan Tersedia!</h3>
+          <button class="modal-close" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="version-badge animate-bounce-in">Version ${Sanitize.string(versionData.version)}</div>
+          <h3>Ada Versi Baru!</h3>
+          <div class="version-date">Build ${Sanitize.string(versionData.build)} · ${Sanitize.string(versionData.releaseDate)}</div>
+          <div class="changelog-title">What's New:</div>
+          <ul class="changelog-list">${changes || `<li>Perbaikan dan peningkatan performa</li>`}</ul>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-action="later">Nanti Saja</button>
+          <button class="btn btn-primary" data-action="refresh">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Refresh Now
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    const modal = overlay.querySelector(".modal");
+
+    const close = () => {
+      overlay.classList.remove("show");
+      setTimeout(() => {
+        overlay.remove();
+      }, 300);
+    };
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
     });
+
+    modal.querySelector(".modal-close").addEventListener("click", close);
     modal
       .querySelector('[data-action="later"]')
       .addEventListener("click", close);
@@ -679,6 +729,10 @@ const Modal = {
         localStorage.setItem("app_version", versionData.version);
         location.reload(true);
       });
+
+    setTimeout(() => overlay.classList.add("show"), 10);
+
+    return { overlay, modal, close };
   },
 };
 
