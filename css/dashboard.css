@@ -9,6 +9,27 @@
   margin-bottom: 24px;
 }
 
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+}
+
 .stat-card {
   position: relative;
   padding: 24px;
@@ -152,6 +173,45 @@
   margin-bottom: 24px;
 }
 
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid .chart-card:first-child,
+  .charts-grid .chart-double {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .chart-card {
+    padding: 20px;
+  }
+
+  .chart-container {
+    height: 240px;
+  }
+
+  .chart-container.small {
+    height: 200px;
+  }
+
+  .circular-wrapper {
+    width: 180px;
+    height: 180px;
+  }
+
+  .circular-percent {
+    font-size: 32px;
+  }
+}
+
 .charts-grid .chart-card:first-child,
 .charts-grid .chart-double {
   grid-column: span 2;
@@ -279,6 +339,27 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .status-card {
+    padding: 16px;
+  }
+
+  .status-value {
+    font-size: 18px;
+  }
 }
 
 .status-card {

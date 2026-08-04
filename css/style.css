@@ -72,6 +72,20 @@ html {
   height: -webkit-fill-available;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 body {
   font-family: var(--font-sans);
   font-size: 14px;
@@ -114,6 +128,8 @@ button {
   border: none;
   background: none;
   color: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 input,
@@ -1793,6 +1809,90 @@ select.form-control {
 
   .card-header {
     padding: 16px;
+  }
+
+  /* Bottom Navigation for Mobile */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.mobile-bottom-nav {
+  display: none;
+}
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    min-height: 56px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--primary);
+  }
+
+  .mobile-nav-item svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+  }
+
+  .mobile-nav-item span {
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .main-content {
+    padding-bottom: 80px;
+  }
+
+  /* Hide sidebar on mobile */
+  .sidebar {
+    width: 280px;
+    max-width: 85vw;
+  }
+
+  /* Improved modal for mobile */
+  .modal {
+    max-height: 85vh;
+    margin: 20px;
+    border-radius: var(--radius-lg);
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  /* Improved toast for mobile */
+  .toast {
+    min-width: auto;
+    max-width: calc(100vw - 40px);
+    margin: 0 20px;
+  }
+
+  .toast-container {
+    left: 0;
+    right: 0;
+    padding: 0 20px;
+  }
+}
   }
 
   .btn {

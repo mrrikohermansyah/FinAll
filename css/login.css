@@ -75,6 +75,35 @@
   min-height: 580px;
 }
 
+@media (max-width: 768px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-hero {
+    display: none;
+  }
+
+  .auth-form-wrap {
+    padding: 32px 24px;
+  }
+
+  .auth-header h2 {
+    font-size: 22px;
+  }
+
+  .auth-btn {
+    height: 52px;
+    font-size: 16px;
+  }
+
+  .social-btn {
+    height: 48px;
+  }
+}
+
 .auth-hero {
   background: linear-gradient(
     135deg,

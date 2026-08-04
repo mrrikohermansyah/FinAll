@@ -3,7 +3,7 @@
    FinAll - Personal Financial Allocation
    ============================================ */
 
-const CACHE_NAME = 'finall-v1.5.286';
+const CACHE_NAME = 'finall-v1.6.0';
 const OFFLINE_CACHE = 'finall-offline-v1';
 
 // Assets to cache immediately
@@ -17,6 +17,7 @@ const CRITICAL_ASSETS = [
   '/settings.html',
   '/reports.html',
   '/release-notes.html',
+  '/manifest.json',
   '/css/critical.css',
   '/css/style.css',
   '/css/dashboard.css',
@@ -36,10 +37,10 @@ const CRITICAL_ASSETS = [
   '/assets/images/no-data.svg',
   '/version.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap',
-  'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js',
-  'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
 
 // Assets to cache on demand
