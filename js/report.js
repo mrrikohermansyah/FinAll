@@ -501,7 +501,7 @@
     const salary = state.salary ? Number(state.salary.amount || 0) : 0;
 
     if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5;margin-bottom:8px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg><div>Belum ada transaksi pada periode ini</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Pilih periode lain atau tambahkan transaksi baru</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="table-empty-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg><div>Belum ada transaksi pada periode ini</div><div class="table-empty-sub">Pilih periode lain atau tambahkan transaksi baru</div></div></td></tr>`;
       return;
     }
 
@@ -514,22 +514,22 @@
       const pct = salary > 0 ? ((total / salary) * 100).toFixed(1) + "%" : "-";
       rows += `<tr>
         <td data-label="Tanggal">${DateUtils.toLocal(t.date)}</td>
-        <td data-label="Nama" style="font-weight:600;">${Sanitize.string(t.name, 60)}</td>
-        <td data-label="Kategori"><span class="badge badge-${cat.colorCode === "yellow" ? "warning" : cat.colorCode === "orange" ? "accent" : "success"}" style="font-weight:500;">${Sanitize.string(cat.name, 20)}</span></td>
-        <td data-label="Nominal" style="text-align:right;">${IDR.format(amt)}</td>
-        <td data-label="Admin" style="text-align:right;">${adm > 0 ? IDR.format(adm) : "-"}</td>
-        <td data-label="Total" style="text-align:right;font-weight:600;">${IDR.format(total)}</td>
+        <td data-label="Nama" class="table-cell-name">${Sanitize.string(t.name, 60)}</td>
+        <td data-label="Kategori"><span class="badge badge-${cat.colorCode === "yellow" ? "warning" : cat.colorCode === "orange" ? "accent" : "success"} badge-category">${Sanitize.string(cat.name, 20)}</span></td>
+        <td data-label="Nominal" class="table-cell-right">${IDR.format(amt)}</td>
+        <td data-label="Admin" class="table-cell-right">${adm > 0 ? IDR.format(adm) : "-"}</td>
+        <td data-label="Total" class="table-cell-right table-cell-bold">${IDR.format(total)}</td>
         <td data-label="Persentase"><span class="badge badge-${Number((total / (salary || 1)) * 100) > 30 ? "danger" : Number((total / (salary || 1)) * 100) > 15 ? "warning" : "info"}">${pct}</span></td>
         <td data-label="Status">${t.isPaid ? '<span class="badge badge-success">✓ Dibayar</span>' : '<span class="badge badge-secondary">Belum</span>'}</td>
       </tr>`;
     });
     const totalAmt = list.reduce((s, t) => s + Number(t.amount || 0), 0);
     const totalAdm = list.reduce((s, t) => s + Number(t.adminAmount || 0), 0);
-    rows += `<tr style="font-weight:700;background:var(--surface-secondary);">
-      <td data-label="Ringkasan" colspan="3" style="text-align:right;">TOTAL</td>
-      <td data-label="Nominal" style="text-align:right;">${IDR.format(totalAmt)}</td>
-      <td data-label="Admin" style="text-align:right;">${IDR.format(totalAdm)}</td>
-      <td data-label="Total" style="text-align:right;color:var(--primary);">${IDR.format(totalAmt + totalAdm)}</td>
+    rows += `<tr class="table-row-total">
+      <td data-label="Ringkasan" colspan="3" class="table-cell-right">TOTAL</td>
+      <td data-label="Nominal" class="table-cell-right">${IDR.format(totalAmt)}</td>
+      <td data-label="Admin" class="table-cell-right">${IDR.format(totalAdm)}</td>
+      <td data-label="Total" class="table-cell-right table-cell-total">${IDR.format(totalAmt + totalAdm)}</td>
       <td data-label="Persentase" colspan="2"></td>
     </tr>`;
     tbody.innerHTML = rows;

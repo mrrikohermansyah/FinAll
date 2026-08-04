@@ -35,7 +35,98 @@
     </noscript>
     <style>
       /* ============================================
-         Reports Page - Mobile Responsive Patch
+         Reports Page - Optimized Styling
+         ============================================ */
+
+      /* Filter controls - consistent max-widths */
+      .filter-select {
+        max-width: 180px;
+      }
+      .filter-select--year {
+        max-width: 140px;
+      }
+
+      /* Button icon styling */
+      .btn-icon {
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 4px;
+      }
+
+      /* Report card value color variants */
+      .report-card-value--accent {
+        color: var(--accent);
+      }
+      .report-card-value--success {
+        color: var(--success);
+      }
+      .report-card-value--variable {
+        color: #5f8d7e;
+      }
+      .report-card-value--saving {
+        color: #c49417;
+      }
+      .report-card-value--primary {
+        color: var(--primary);
+      }
+      .report-card-value--danger {
+        color: var(--danger);
+      }
+      .report-card-value--category {
+        font-size: 16px;
+      }
+
+      /* Secondary summary section layout */
+      .report-summary--secondary {
+        grid-template-columns: repeat(4, 1fr);
+        margin-top: 16px;
+        margin-bottom: 24px;
+      }
+
+      /* Chart container variants */
+      .chart-container--tall {
+        height: 300px;
+      }
+
+      /* Table wrapper without border */
+      .table-wrapper--no-border {
+        border: none;
+      }
+
+      /* Table cell styling classes */
+      .table-cell-name {
+        font-weight: 600;
+      }
+      .table-cell-right {
+        text-align: right;
+      }
+      .table-cell-bold {
+        font-weight: 600;
+      }
+      .table-cell-total {
+        color: var(--primary);
+      }
+      .table-row-total {
+        font-weight: 700;
+        background: var(--surface-secondary);
+      }
+      .badge-category {
+        font-weight: 500;
+      }
+
+      /* Table empty state styling */
+      .table-empty-icon {
+        opacity: 0.5;
+        margin-bottom: 8px;
+      }
+      .table-empty-sub {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* ============================================
+         Mobile Responsive Patch
          ============================================ */
 
       @media (max-width: 768px) {
@@ -45,7 +136,8 @@
           align-items: stretch;
           gap: 12px;
         }
-        .filter-bar .form-control {
+        .filter-bar .form-control,
+        .filter-select {
           max-width: none !important;
           width: 100%;
         }
@@ -68,16 +160,14 @@
           grid-template-columns: repeat(2, 1fr) !important;
           gap: 12px;
         }
+        .report-summary--secondary {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
         .report-card {
           padding: 16px;
         }
         .report-card-value {
           font-size: 18px;
-        }
-
-        /* Second summary section with 4 columns */
-        .report-summary[style*="grid-template-columns: repeat(4, 1fr)"] {
-          grid-template-columns: repeat(2, 1fr) !important;
         }
 
         /* Charts grid: stack vertically */
@@ -127,7 +217,7 @@
           box-shadow: var(--shadow-sm);
         }
         /* Hide total row on mobile (already shown in summary cards) */
-        #rptTable tr[style*="background"] {
+        #rptTable tr.table-row-total {
           display: none;
         }
         #rptTable td {
@@ -164,6 +254,9 @@
       @media (max-width: 480px) {
         /* Summary cards: single column on very small screens */
         .report-summary {
+          grid-template-columns: 1fr !important;
+        }
+        .report-summary--secondary {
           grid-template-columns: 1fr !important;
         }
         .report-card-value {
@@ -394,14 +487,12 @@
           <!-- Filter -->
           <div class="filter-bar">
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="reportMonth"
-              style="max-width: 180px"
             ></select>
             <select
-              class="form-control"
+              class="form-control filter-select filter-select--year"
               id="reportYear"
-              style="max-width: 140px"
             ></select>
             <div class="spacer"></div>
             <div class="filter-actions">
@@ -415,11 +506,7 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  style="
-                    display: inline-block;
-                    vertical-align: middle;
-                    margin-right: 4px;
-                  "
+                  class="btn-icon"
                 >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
@@ -437,11 +524,7 @@
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  style="
-                    display: inline-block;
-                    vertical-align: middle;
-                    margin-right: 4px;
-                  "
+                  class="btn-icon"
                 >
                   <polyline points="6 9 6 2 18 2 18 9"></polyline>
                   <path
@@ -464,9 +547,8 @@
             <div class="report-card animate-fade-up animate-delay-2">
               <div class="report-card-label">Total Alokasi</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--accent"
                 id="rptAllocated"
-                style="color: var(--accent)"
               >
                 Rp 0
               </div>
@@ -477,9 +559,8 @@
             <div class="report-card animate-fade-up animate-delay-3">
               <div class="report-card-label">Sisa Gaji</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--success"
                 id="rptRemaining"
-                style="color: var(--success)"
               >
                 Rp 0
               </div>
@@ -490,9 +571,8 @@
             <div class="report-card animate-fade-up animate-delay-4">
               <div class="report-card-label">Pengeluaran Tetap</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--accent"
                 id="rptFixed"
-                style="color: var(--accent)"
               >
                 Rp 0
               </div>
@@ -503,9 +583,8 @@
             <div class="report-card animate-fade-up animate-delay-1">
               <div class="report-card-label">Pengeluaran Berubah</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--variable"
                 id="rptVariable"
-                style="color: #5f8d7e"
               >
                 Rp 0
               </div>
@@ -516,9 +595,8 @@
             <div class="report-card animate-fade-up animate-delay-2">
               <div class="report-card-label">Total Tabungan</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--saving"
                 id="rptSaving"
-                style="color: #c49417"
               >
                 Rp 0
               </div>
@@ -529,20 +607,12 @@
           </section>
 
           <!-- Additional Summary -->
-          <section
-            class="report-summary"
-            style="
-              grid-template-columns: repeat(4, 1fr);
-              margin-top: 16px;
-              margin-bottom: 24px;
-            "
-          >
+          <section class="report-summary report-summary--secondary">
             <div class="report-card">
               <div class="report-card-label">Total Admin</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--primary"
                 id="rptAdmin"
-                style="color: var(--primary)"
               >
                 Rp 0
               </div>
@@ -550,9 +620,8 @@
             <div class="report-card">
               <div class="report-card-label">Transaksi Dibayar</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--success"
                 id="rptPaid"
-                style="color: var(--success)"
               >
                 0
               </div>
@@ -563,9 +632,8 @@
             <div class="report-card">
               <div class="report-card-label">Belum Dibayar</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--danger"
                 id="rptUnpaid"
-                style="color: var(--danger)"
               >
                 0
               </div>
@@ -574,9 +642,8 @@
             <div class="report-card">
               <div class="report-card-label">Kategori Terbesar</div>
               <div
-                class="report-card-value"
+                class="report-card-value report-card-value--category"
                 id="rptTopCategory"
-                style="font-size: 16px"
               >
                 -
               </div>
@@ -619,7 +686,7 @@
                   </div>
                 </div>
               </div>
-              <div class="chart-container" style="height: 300px">
+              <div class="chart-container chart-container--tall">
                 <canvas id="rptLineChart"></canvas>
               </div>
             </div>
@@ -633,7 +700,7 @@
                   </div>
                 </div>
               </div>
-              <div class="table-wrapper" style="border: none">
+              <div class="table-wrapper table-wrapper--no-border">
                 <table class="table" id="rptTable">
                   <thead>
                     <tr>

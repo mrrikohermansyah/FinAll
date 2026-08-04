@@ -1,14 +1,16 @@
 {
-  "version": "1.6.4",
-  "build": "013.003",
+  "version": "1.6.5",
+  "build": "013.004",
   "releaseDate": "2026-08-04",
-  "releaseNote": "Mobile Responsiveness Optimization",
+  "releaseNote": "Reports Page Styling Optimization",
   "changes": [
-    "Converted transaction table to card layout on mobile devices",
-    "Converted reports table to card layout on mobile devices",
-    "Fixed filter bar layout for mobile in reports.html",
-    "Fixed summary cards grid layout for mobile in reports.html",
-    "Added automatic card view switch for mobile in transaction.html",
-    "Improved UX - no zoom required on mobile devices"
+    "Removed all inline styles from reports.html",
+    "Converted inline styles to semantic CSS classes",
+    "Fixed filter controls styling with proper CSS classes",
+    "Fixed report summary cards with color variant classes",
+    "Fixed table cell styling with CSS classes",
+    "Updated report.js to use CSS classes instead of inline styles",
+    "Improved responsive design consistency across all pages",
+    "Reports page now matches dashboard and transaction styling"
   ]
 }
