@@ -513,24 +513,24 @@
       const total = amt + adm;
       const pct = salary > 0 ? ((total / salary) * 100).toFixed(1) + "%" : "-";
       rows += `<tr>
-        <td>${DateUtils.toLocal(t.date)}</td>
-        <td style="font-weight:600;">${Sanitize.string(t.name, 60)}</td>
-        <td><span class="badge badge-${cat.colorCode === "yellow" ? "warning" : cat.colorCode === "orange" ? "accent" : "success"}" style="font-weight:500;">${Sanitize.string(cat.name, 20)}</span></td>
-        <td style="text-align:right;">${IDR.format(amt)}</td>
-        <td style="text-align:right;">${adm > 0 ? IDR.format(adm) : "-"}</td>
-        <td style="text-align:right;font-weight:600;">${IDR.format(total)}</td>
-        <td><span class="badge badge-${Number((total / (salary || 1)) * 100) > 30 ? "danger" : Number((total / (salary || 1)) * 100) > 15 ? "warning" : "info"}">${pct}</span></td>
-        <td>${t.isPaid ? '<span class="badge badge-success">✓ Dibayar</span>' : '<span class="badge badge-secondary">Belum</span>'}</td>
+        <td data-label="Tanggal">${DateUtils.toLocal(t.date)}</td>
+        <td data-label="Nama" style="font-weight:600;">${Sanitize.string(t.name, 60)}</td>
+        <td data-label="Kategori"><span class="badge badge-${cat.colorCode === "yellow" ? "warning" : cat.colorCode === "orange" ? "accent" : "success"}" style="font-weight:500;">${Sanitize.string(cat.name, 20)}</span></td>
+        <td data-label="Nominal" style="text-align:right;">${IDR.format(amt)}</td>
+        <td data-label="Admin" style="text-align:right;">${adm > 0 ? IDR.format(adm) : "-"}</td>
+        <td data-label="Total" style="text-align:right;font-weight:600;">${IDR.format(total)}</td>
+        <td data-label="Persentase"><span class="badge badge-${Number((total / (salary || 1)) * 100) > 30 ? "danger" : Number((total / (salary || 1)) * 100) > 15 ? "warning" : "info"}">${pct}</span></td>
+        <td data-label="Status">${t.isPaid ? '<span class="badge badge-success">✓ Dibayar</span>' : '<span class="badge badge-secondary">Belum</span>'}</td>
       </tr>`;
     });
     const totalAmt = list.reduce((s, t) => s + Number(t.amount || 0), 0);
     const totalAdm = list.reduce((s, t) => s + Number(t.adminAmount || 0), 0);
     rows += `<tr style="font-weight:700;background:var(--surface-secondary);">
-      <td colspan="3" style="text-align:right;">TOTAL</td>
-      <td style="text-align:right;">${IDR.format(totalAmt)}</td>
-      <td style="text-align:right;">${IDR.format(totalAdm)}</td>
-      <td style="text-align:right;color:var(--primary);">${IDR.format(totalAmt + totalAdm)}</td>
-      <td colspan="2"></td>
+      <td data-label="Ringkasan" colspan="3" style="text-align:right;">TOTAL</td>
+      <td data-label="Nominal" style="text-align:right;">${IDR.format(totalAmt)}</td>
+      <td data-label="Admin" style="text-align:right;">${IDR.format(totalAdm)}</td>
+      <td data-label="Total" style="text-align:right;color:var(--primary);">${IDR.format(totalAmt + totalAdm)}</td>
+      <td data-label="Persentase" colspan="2"></td>
     </tr>`;
     tbody.innerHTML = rows;
   }

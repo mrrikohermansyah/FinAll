@@ -1,11 +1,14 @@
 {
-  "version": "1.6.0",
-  "build": "013.002",
+  "version": "1.6.3",
+  "build": "013.003",
   "releaseDate": "2026-08-04",
-  "releaseNote": "CSS Progress Bar Fix",
+  "releaseNote": "Mobile Responsiveness Optimization",
   "changes": [
-    "Fixed CSS class conflict in progress payment card",
-    "Renamed progress bar container to progress-container",
-    "Updated CSS rules to support new class name"
+    "Converted transaction table to card layout on mobile devices",
+    "Converted reports table to card layout on mobile devices",
+    "Fixed filter bar layout for mobile in reports.html",
+    "Fixed summary cards grid layout for mobile in reports.html",
+    "Added automatic card view switch for mobile in transaction.html",
+    "Improved UX - no zoom required on mobile devices"
   ]
 }

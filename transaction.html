@@ -131,27 +131,21 @@
           justify-content: center;
         }
 
-        /* Table: shrink and hide less critical columns so it fits
-           without endless horizontal scrolling. Columns hidden:
-           No. (1), Admin (6), % (8), Warna (10), Remark (11) */
-        #txTable {
-          font-size: 12px;
+        /* Automatically switch to card view on mobile */
+        #tableView {
+          display: none !important;
         }
-        #txTable th,
-        #txTable td {
-          padding: 10px 8px;
+        #cardView {
+          display: block !important;
         }
-        #txTable th:nth-child(1),
-        #txTable td:nth-child(1),
-        #txTable th:nth-child(6),
-        #txTable td:nth-child(6),
-        #txTable th:nth-child(8),
-        #txTable td:nth-child(8),
-        #txTable th:nth-child(10),
-        #txTable td:nth-child(10),
-        #txTable th:nth-child(11),
-        #txTable td:nth-child(11) {
+        #viewToggle {
           display: none;
+        }
+
+        /* Card grid adjustments for mobile */
+        .transaction-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
         }
       }
 

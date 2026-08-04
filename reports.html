@@ -33,6 +33,167 @@
       <link rel="stylesheet" href="css/dashboard.css" />
       <link rel="stylesheet" href="css/non-critical.css" />
     </noscript>
+    <style>
+      /* ============================================
+         Reports Page - Mobile Responsive Patch
+         ============================================ */
+
+      @media (max-width: 768px) {
+        /* Filter bar: stack everything full-width */
+        .filter-bar {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 12px;
+        }
+        .filter-bar .form-control {
+          max-width: none !important;
+          width: 100%;
+        }
+        .filter-bar .spacer {
+          display: none;
+        }
+        .filter-actions {
+          width: 100%;
+          justify-content: space-between;
+          flex-wrap: wrap;
+        }
+        .filter-actions .btn {
+          flex: 1;
+          justify-content: center;
+          min-width: 120px;
+        }
+
+        /* Summary cards: responsive grid */
+        .report-summary {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px;
+        }
+        .report-card {
+          padding: 16px;
+        }
+        .report-card-value {
+          font-size: 18px;
+        }
+
+        /* Second summary section with 4 columns */
+        .report-summary[style*="grid-template-columns: repeat(4, 1fr)"] {
+          grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        /* Charts grid: stack vertically */
+        .report-charts-grid {
+          grid-template-columns: 1fr !important;
+          gap: 16px;
+        }
+        .chart-card {
+          padding: 20px;
+        }
+        .chart-container {
+          height: 240px;
+        }
+        .chart-card.full-width {
+          grid-column: span 1 !important;
+        }
+
+        /* Table: convert to card layout on mobile */
+        .table-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        .table {
+          font-size: 12px;
+          min-width: 600px;
+        }
+        .table th,
+        .table td {
+          padding: 10px 8px;
+        }
+
+        /* Hide table header and convert rows to cards */
+        #rptTable thead {
+          display: none;
+        }
+        #rptTable tbody {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        #rptTable tr {
+          display: block;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-md);
+          padding: 16px;
+          box-shadow: var(--shadow-sm);
+        }
+        /* Hide total row on mobile (already shown in summary cards) */
+        #rptTable tr[style*="background"] {
+          display: none;
+        }
+        #rptTable td {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid var(--surface-alt);
+        }
+        #rptTable td:last-child {
+          border-bottom: none;
+        }
+        #rptTable td::before {
+          content: attr(data-label);
+          font-weight: 600;
+          color: var(--text-muted);
+          margin-right: 12px;
+          font-size: 11px;
+          text-transform: uppercase;
+        }
+        /* Handle empty state */
+        #rptTable td[colspan="8"] {
+          display: block;
+          border-bottom: none;
+        }
+        #rptTable td[colspan="8"]::before {
+          display: none;
+        }
+        #rptTable td[colspan="8"] .table-empty {
+          text-align: center;
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Summary cards: single column on very small screens */
+        .report-summary {
+          grid-template-columns: 1fr !important;
+        }
+        .report-card-value {
+          font-size: 16px;
+        }
+        .report-card-label {
+          font-size: 11px;
+        }
+        .report-card-sub {
+          font-size: 10px;
+        }
+
+        /* Filter buttons - smaller text */
+        .filter-actions .btn {
+          font-size: 12px;
+          padding: 8px 12px;
+        }
+
+        /* Chart containers - smaller height */
+        .chart-container {
+          height: 200px;
+        }
+        .chart-title {
+          font-size: 13px;
+        }
+        .chart-subtitle {
+          font-size: 11px;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="loading-screen">
