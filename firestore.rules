@@ -10,14 +10,149 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Data validation functions
+    function isValidString(value, min, max) {
+      return value is string && value.length >= min && value.length <= max;
+    }
+
+    function isValidNumber(value, min, max) {
+      return value is number && value >= min && value <= max;
+    }
+
+    function isValidEmail(value) {
+      return value is string && value.matches('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$');
+    }
+
+    function isValidColorCode(value) {
+      return value is string && value in ['sage', 'orange', 'yellow', 'blue', 'purple', 'pink', 'custom1', 'custom2', 'custom3'];
+    }
+
+    function isValidCategoryType(value) {
+      return value is string && value in ['fixed', 'variable', 'saving'];
+    }
+
+    function isValidTransactionStatus(value) {
+      return value is string && value in ['paid', 'unpaid', 'pending'];
+    }
+
+    // Prevent XSS by checking for dangerous patterns
+    function containsXSS(value) {
+      return value is string && (
+        value.contains('<script') ||
+        value.contains('javascript:') ||
+        value.contains('onerror') ||
+        value.contains('onload') ||
+        value.contains('onclick') ||
+        value.contains('onmouseover') ||
+        value.contains('eval(') ||
+        value.contains('expression(')
+      );
+    }
+
+    function isSafeString(value) {
+      return !containsXSS(value);
+    }
+
     match /users/{userId} {
       allow read, write: if isOwner(userId);
+
+      // Categories collection
+      match /categories/{categoryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.size() > 0 &&
+          isValidString(request.resource.data.name, 1, 100) &&
+          isSafeString(request.resource.data.name) &&
+          isValidColorCode(request.resource.data.colorCode) &&
+          isValidCategoryType(request.resource.data.type) &&
+          request.resource.data.id is string &&
+          request.resource.data.id.length > 0;
+        
+        allow update: if isOwner(userId) &&
+          isValidString(request.resource.data.name, 1, 100) &&
+          isSafeString(request.resource.data.name) &&
+          isValidColorCode(request.resource.data.colorCode) &&
+          isValidCategoryType(request.resource.data.type);
+        
+        allow delete: if isOwner(userId);
+      }
+
+      // Transactions collection
+      match /transactions/{transactionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.size() > 0 &&
+          isValidString(request.resource.data.name, 1, 200) &&
+          isSafeString(request.resource.data.name) &&
+          isValidNumber(request.resource.data.amount, 0, 10000000000) &&
+          isValidString(request.resource.data.categoryId, 1, 100) &&
+          isValidString(request.resource.data.month, 7, 7) && // YYYY-MM format
+          isValidString(request.resource.data.date, 10, 30) &&
+          isValidTransactionStatus(request.resource.data.status) &&
+          request.resource.data.id is string &&
+          request.resource.data.id.length > 0;
+        
+        allow update: if isOwner(userId) &&
+          isValidString(request.resource.data.name, 1, 200) &&
+          isSafeString(request.resource.data.name) &&
+          isValidNumber(request.resource.data.amount, 0, 10000000000) &&
+          isValidString(request.resource.data.categoryId, 1, 100) &&
+          isValidTransactionStatus(request.resource.data.status);
+        
+        allow delete: if isOwner(userId);
+      }
+
+      // Admin transactions collection
+      match /admin_transactions/{adminId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.size() > 0 &&
+          isValidString(request.resource.data.name, 1, 100) &&
+          isSafeString(request.resource.data.name) &&
+          isValidNumber(request.resource.data.amount, 0, 1000000) &&
+          request.resource.data.id is string &&
+          request.resource.data.id.length > 0;
+        
+        allow update: if isOwner(userId) &&
+          isValidString(request.resource.data.name, 1, 100) &&
+          isSafeString(request.resource.data.name) &&
+          isValidNumber(request.resource.data.amount, 0, 1000000);
+        
+        allow delete: if isOwner(userId);
+      }
+
+      // Salary collection
+      match /salary/{salaryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) &&
+          request.resource.data.size() > 0 &&
+          isValidString(request.resource.data.month, 7, 7) && // YYYY-MM format
+          isValidNumber(request.resource.data.amount, 0, 10000000000) &&
+          request.resource.data.id is string &&
+          request.resource.data.id.length > 0;
+        
+        allow update: if isOwner(userId) &&
+          isValidString(request.resource.data.month, 7, 7) &&
+          isValidNumber(request.resource.data.amount, 0, 10000000000);
+        
+        allow delete: if isOwner(userId);
+      }
+
+      // User profile document
+      match /profile/{profileId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) &&
+          (!request.resource.data.containsKey('displayName') || isValidString(request.resource.data.displayName, 1, 50)) &&
+          (!request.resource.data.containsKey('displayName') || isSafeString(request.resource.data.displayName)) &&
+          (!request.resource.data.containsKey('email') || isValidEmail(request.resource.data.email));
+      }
 
       match /{document=**} {
         allow read, write: if isOwner(userId);
       }
     }
 
+    // Deny all other access
     match /{document=**} {
       allow read, write: if false;
     }

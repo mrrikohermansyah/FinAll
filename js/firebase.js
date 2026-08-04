@@ -38,6 +38,42 @@ const App = {
 };
 
 /* ============================================
+   Service Worker Registration
+   ============================================ */
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('[Service Worker] Registered:', registration.scope);
+          
+          // Check for updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New version available
+                Toast.info('Versi baru tersedia. Refresh untuk update.', 'Update Tersedia', 5000);
+              }
+            });
+          });
+        })
+        .catch((error) => {
+          console.error('[Service Worker] Registration failed:', error);
+        });
+    });
+
+    // Handle service worker messages
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'CACHE_UPDATED') {
+        Toast.success('Cache diperbarui. Halaman akan di-refresh.');
+        setTimeout(() => window.location.reload(), 2000);
+      }
+    });
+  }
+}
+
+/* ============================================
    Initialize Firebase (using CDN global)
    ============================================ */
 function initFirebase() {
@@ -131,7 +167,28 @@ const Sanitize = {
   string(value, max = 200) {
     if (value === null || value === undefined) return "";
     let str = String(value).trim();
+    
+    // Remove all HTML tags
     str = str.replace(/<[^>]*>/g, "");
+    
+    // Remove dangerous JavaScript patterns
+    str = str.replace(/javascript:/gi, "");
+    str = str.replace(/on\w+\s*=/gi, ""); // Remove event handlers like onclick=
+    str = str.replace(/data:\w+\/\w+;base64/gi, ""); // Remove data URIs
+    
+    // Handle encoded characters
+    str = str.replace(/&#(\d+);/g, (match, dec) => {
+      const num = parseInt(dec, 10);
+      // Only allow safe characters (printable ASCII excluding control chars)
+      return (num >= 32 && num <= 126) ? String.fromCharCode(num) : "";
+    });
+    
+    str = str.replace(/&#[xX]([0-9a-fA-F]+);/g, (match, hex) => {
+      const num = parseInt(hex, 16);
+      return (num >= 32 && num <= 126) ? String.fromCharCode(num) : "";
+    });
+    
+    // Escape HTML special characters
     str = str.replace(
       /[<>\"'&]/g,
       (c) =>
@@ -143,27 +200,272 @@ const Sanitize = {
           "&": "&amp;",
         })[c],
     );
+    
+    // Remove any remaining potentially dangerous patterns
+    str = str.replace(/eval\(/gi, "");
+    str = str.replace(/expression\(/gi, "");
+    str = str.replace(/vbscript:/gi, "");
+    str = str.replace(/@import/gi, "");
+    
     return str.slice(0, max);
   },
+  
+  html(value, max = 2000) {
+    // For fields that allow some HTML (like remarks), use stricter sanitization
+    if (value === null || value === undefined) return "";
+    let str = String(value).trim();
+    
+    // Allow only safe HTML tags
+    const allowedTags = ['<b>', '</b>', '<i>', '</i>', '<u>', '</u>', '<strong>', '</strong>', '<em>', '</em>', '<br>', '<br/>', '<p>', '</p>'];
+    const tagRegex = /<\/?[\w\s="'-]+>/g;
+    
+    str = str.replace(tagRegex, (tag) => {
+      const normalizedTag = tag.toLowerCase().replace(/\s+/g, '');
+      return allowedTags.includes(normalizedTag) ? tag : '';
+    });
+    
+    // Remove all event handlers and dangerous attributes
+    str = str.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, "");
+    str = str.replace(/\s*on\w+\s*=\s*[^\s>]*/gi, "");
+    str = str.replace(/\s*href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+    str = str.replace(/\s*src\s*=\s*["']javascript:[^"']*["']/gi, 'src=""');
+    
+    return str.slice(0, max);
+  },
+  
   number(value, min = 0, max = Number.MAX_SAFE_INTEGER) {
     const n = Number(value);
     if (isNaN(n)) return 0;
     return Math.min(Math.max(n, min), max);
   },
+  
   email(value) {
     if (!value) return "";
     const str = String(value).trim().toLowerCase();
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // More strict email validation
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return regex.test(str) ? str : "";
   },
+  
   date(value) {
     const d = value ? new Date(value) : new Date();
     if (isNaN(d.getTime())) return new Date().toISOString();
     return d.toISOString();
   },
+  
+  url(value) {
+    if (!value) return "";
+    const str = String(value).trim();
+    // Basic URL validation
+    try {
+      const url = new URL(str);
+      // Only allow http/https protocols
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return "";
+      }
+      return url.toString();
+    } catch (e) {
+      return "";
+    }
+  },
+  
   id() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
   },
+  
+  // Sanitize object properties recursively
+  object(obj, schema = {}) {
+    if (!obj || typeof obj !== 'object') return obj;
+    
+    const sanitized = Array.isArray(obj) ? [] : {};
+    
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        const sanitizer = schema[key];
+        
+        if (sanitizer && typeof sanitizer === 'function') {
+          sanitized[key] = sanitizer(value);
+        } else if (typeof value === 'string') {
+          sanitized[key] = this.string(value);
+        } else if (typeof value === 'number') {
+          sanitized[key] = this.number(value);
+        } else if (typeof value === 'object' && value !== null) {
+          sanitized[key] = this.object(value, schema);
+        } else {
+          sanitized[key] = value;
+        }
+      }
+    }
+    
+    return sanitized;
+  }
+};
+
+/* ============================================
+   Error Handling System
+   ============================================ */
+const ErrorHandler = {
+  // Error categories
+  ErrorTypes: {
+    NETWORK: 'NETWORK_ERROR',
+    AUTH: 'AUTH_ERROR',
+    DATABASE: 'DATABASE_ERROR',
+    VALIDATION: 'VALIDATION_ERROR',
+    PERMISSION: 'PERMISSION_ERROR',
+    UNKNOWN: 'UNKNOWN_ERROR'
+  },
+
+  // Handle Firebase errors with user-friendly messages
+  handleFirebaseError(error, context = '') {
+    console.error(`[Firebase Error${context ? ` - ${context}` : ''}:`, error);
+    
+    let message = 'Terjadi kesalahan. Silakan coba lagi.';
+    let type = 'error';
+    
+    if (!error) {
+      return { message, type, code: 'UNKNOWN' };
+    }
+
+    const code = error.code || error.message || 'UNKNOWN';
+    
+    // Firebase Auth errors
+    if (code.includes('auth/')) {
+      switch (code) {
+        case 'auth/user-not-found':
+          message = 'Email tidak ditemukan. Silakan periksa kembali.';
+          break;
+        case 'auth/wrong-password':
+          message = 'Password salah. Silakan coba lagi.';
+          break;
+        case 'auth/email-already-in-use':
+          message = 'Email sudah terdaftar. Gunakan email lain atau login.';
+          break;
+        case 'auth/invalid-email':
+          message = 'Format email tidak valid.';
+          break;
+        case 'auth/weak-password':
+          message = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Terlalu banyak percobaan login. Silakan tunggu beberapa saat.';
+          break;
+        case 'auth/popup-closed-by-user':
+          message = 'Login dibatalkan.';
+          type = 'warning';
+          break;
+        case 'auth/popup-blocked':
+          message = 'Popup login diblokir browser. Silakan izinkan popup.';
+          type = 'warning';
+          break;
+        case 'auth/cancelled-popup-request':
+          message = 'Login dibatalkan.';
+          type = 'warning';
+          break;
+        case 'auth/timeout':
+          message = 'Waktu login habis. Silakan coba lagi.';
+          break;
+        default:
+          message = `Error autentikasi: ${code}`;
+      }
+      return { message, type, code: this.ErrorTypes.AUTH, originalCode: code };
+    }
+    
+    // Firebase Firestore errors
+    if (code.includes('firestore/') || code.includes('permission-denied')) {
+      switch (code) {
+        case 'firestore/permission-denied':
+          message = 'Anda tidak memiliki izin untuk mengakses data ini.';
+          break;
+        case 'firestore/not-found':
+          message = 'Data tidak ditemukan.';
+          break;
+        case 'firestore/already-exists':
+          message = 'Data sudah ada.';
+          break;
+        case 'firestore/failed-precondition':
+          message = 'Operasi gagal. Silakan periksa koneksi internet.';
+          break;
+        case 'firestore/unavailable':
+          message = 'Layanan database tidak tersedia. Periksa koneksi internet.';
+          break;
+        default:
+          message = `Error database: ${code}`;
+      }
+      return { message, type, code: this.ErrorTypes.DATABASE, originalCode: code };
+    }
+    
+    // Network errors
+    if (code.includes('network') || code.includes('offline') || code.includes('timeout')) {
+      message = 'Koneksi internet bermasalah. Periksa koneksi Anda.';
+      return { message, type, code: this.ErrorTypes.NETWORK, originalCode: code };
+    }
+    
+    // Generic error
+    return { message, type, code: this.ErrorTypes.UNKNOWN, originalCode: code };
+  },
+
+  // Log error with context
+  log(error, context = '', level = 'error') {
+    const logMethod = level === 'error' ? console.error : 
+                     level === 'warn' ? console.warn : 
+                     console.log;
+    
+    logMethod(`[${level.toUpperCase()}${context ? ` - ${context}` : ''}]:`, error);
+    
+    // In production, you might want to send this to an error tracking service
+    // like Sentry, Firebase Crashlytics, etc.
+  },
+
+  // Create error boundary wrapper for async functions
+  async wrapAsync(asyncFn, context = '') {
+    try {
+      return await asyncFn();
+    } catch (error) {
+      const errorInfo = this.handleFirebaseError(error, context);
+      Toast.error(errorInfo.message);
+      this.log(error, context, 'error');
+      throw error; // Re-throw for further handling if needed
+    }
+  },
+
+  // Validation error handler
+  validation(field, value, rules) {
+    const errors = [];
+    
+    for (const rule of rules) {
+      if (rule.required && (!value || value.toString().trim() === '')) {
+        errors.push(`${field} diperlukan`);
+        continue;
+      }
+      
+      if (rule.minLength && value.toString().length < rule.minLength) {
+        errors.push(`${field} minimal ${rule.minLength} karakter`);
+      }
+      
+      if (rule.maxLength && value.toString().length > rule.maxLength) {
+        errors.push(`${field} maksimal ${rule.maxLength} karakter`);
+      }
+      
+      if (rule.pattern && !rule.pattern.test(value)) {
+        errors.push(`${field} format tidak valid`);
+      }
+      
+      if (rule.min && Number(value) < rule.min) {
+        errors.push(`${field} minimal ${rule.min}`);
+      }
+      
+      if (rule.max && Number(value) > rule.max) {
+        errors.push(`${field} maksimal ${rule.max}`);
+      }
+      
+      if (rule.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        errors.push(`${field} format email tidak valid`);
+      }
+    }
+    
+    return errors;
+  }
 };
 
 /* ============================================
@@ -515,11 +817,12 @@ const DB = {
 };
 
 /* ============================================
-   Date Utilities (Indonesian locale)
+   Date Utilities (Indonesian locale) - Enhanced
    ============================================ */
 const DateUtils = {
+  // Enhanced format function with consistent date handling
   format(date, type = "full") {
-    const d = new Date(date);
+    const d = date ? new Date(date) : new Date();
     if (isNaN(d.getTime())) return "-";
     const months = [
       "Januari",
@@ -563,9 +866,39 @@ const DateUtils = {
         return d.toLocaleDateString("id-ID");
     }
   },
+  
+  // Format date to YYYY-MM string (month format)
+  toYearMonth(date) {
+    const d = date ? new Date(date) : new Date();
+    if (isNaN(d.getTime())) return new Date().toISOString().slice(0, 7);
+    return d.toISOString().slice(0, 7);
+  },
+
+  // Format date to YYYY-MM-DD string
+  toISODate(date) {
+    const d = date ? new Date(date) : new Date();
+    if (isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
+    return d.toISOString().slice(0, 10);
+  },
+
+  // Parse date string to Date object
+  parse(dateStr) {
+    if (!dateStr) return new Date();
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date() : d;
+  },
+
+  // Get month name in Indonesian
+  getMonthName(monthIndex) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return months[monthIndex] || '';
+  },
+
   getMonthYear(date = new Date()) {
     return new Date(date).toISOString().slice(0, 7);
   },
+  
   months() {
     return [
       "Januari",
@@ -582,27 +915,72 @@ const DateUtils = {
       "Desember",
     ];
   },
+  
   years(startOffset = 0, count = 10) {
     const y = new Date().getFullYear() + startOffset;
     return Array.from({ length: count }, (_, i) => y - i);
   },
+  
   daysInMonth(ym) {
     const [y, m] = ym.split("-").map(Number);
     return new Date(y, m, 0).getDate();
   },
+  
   ymd(date = new Date()) {
     const d = new Date(date);
     if (isNaN(d.getTime())) return "";
     return d.toISOString().slice(0, 10);
   },
+  
   toLocal(date) {
     const d = new Date(date);
     if (isNaN(d.getTime())) return "-";
     return `${d.getDate()}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   },
+  
   today() {
     return DateUtils.format(new Date(), "full");
   },
+
+  // Check if date is valid
+  isValid(date) {
+    const d = new Date(date);
+    return !isNaN(d.getTime());
+  },
+
+  // Get start of month
+  startOfMonth(date) {
+    const d = this.parse(date);
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  },
+
+  // Get end of month
+  endOfMonth(date) {
+    const d = this.parse(date);
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  },
+
+  // Add days to date
+  addDays(date, days) {
+    const d = this.parse(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  },
+
+  // Add months to date
+  addMonths(date, months) {
+    const d = this.parse(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+  },
+
+  // Get difference in days between two dates
+  diffDays(date1, date2) {
+    const d1 = this.parse(date1);
+    const d2 = this.parse(date2);
+    const diffTime = Math.abs(d2 - d1);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
 };
 
 /* ============================================
@@ -810,6 +1188,7 @@ const Shortcuts = {
 function bootstrapApp(needsAuth = false) {
   Loader.show();
   Theme.init();
+  registerServiceWorker(); // Register service worker for offline support
   if (!initFirebase()) {
     setTimeout(() => {
       Loader.hide();

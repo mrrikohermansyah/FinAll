@@ -13,6 +13,26 @@
   let salaryHistory = [];
   let charts = {};
 
+  // Chart cleanup function to prevent memory leaks
+  function destroyChart(chartInstance) {
+    if (chartInstance) {
+      try {
+        chartInstance.destroy();
+        chartInstance = null;
+      } catch (e) {
+        console.warn("Error destroying chart:", e);
+      }
+    }
+  }
+
+  function destroyAllCharts() {
+    Object.values(charts).forEach((c) => destroyChart(c));
+    charts = {};
+  }
+
+  // Clean up charts when page is unloaded
+  window.addEventListener('beforeunload', destroyAllCharts);
+
   const CHART_COLORS = [
     "#5F8D7E",
     "#A7C4A0",
@@ -31,6 +51,10 @@
   /* ============================================
      FIXED: Inisialisasi yang benar untuk Mobile
      ============================================ */
+  let authStateResolver = null;
+  let authTimeout = null;
+  let authUnsubscribe = null;
+
   document.addEventListener("DOMContentLoaded", async () => {
     // Step 1: Tunggu Firebase SDK siap
     await waitForFirebaseReady();
@@ -89,6 +113,7 @@
   /**
    * Tunggu status auth yang sebenarnya dari Firebase via onAuthStateChanged
    * Ini adalah cara yang PALING RELIABLE untuk mendeteksi user di iOS/Android
+   * FIXED: Improved race condition handling with proper cleanup
    */
   function waitForAuthState() {
     return new Promise((resolve) => {
@@ -98,20 +123,71 @@
         return;
       }
 
-      const timeout = setTimeout(() => {
-        console.warn("[Dashboard] Auth state timeout");
-        unsubscribe();
-        resolve(null);
-      }, 8000); // Timeout 8 detik untuk mobile yang lambat
+      // Clean up any existing listeners
+      if (authUnsubscribe) {
+        authUnsubscribe();
+        authUnsubscribe = null;
+      }
+      if (authTimeout) {
+        clearTimeout(authTimeout);
+        authTimeout = null;
+      }
 
-      const unsubscribe = App.auth.onAuthStateChanged((user) => {
-        clearTimeout(timeout);
-        unsubscribe();
+      authStateResolver = resolve;
+
+      // Set timeout untuk mencegah hanging
+      authTimeout = setTimeout(() => {
+        console.warn("[Dashboard] Auth state timeout after 10 seconds");
+        if (authUnsubscribe) {
+          authUnsubscribe();
+          authUnsubscribe = null;
+        }
+        if (authStateResolver) {
+          authStateResolver(null);
+          authStateResolver = null;
+        }
+      }, 10000); // Timeout 10 detik untuk mobile yang lambat
+
+      // Set up auth state listener
+      authUnsubscribe = App.auth.onAuthStateChanged((user) => {
+        // Clear timeout segera setelah mendapatkan response
+        if (authTimeout) {
+          clearTimeout(authTimeout);
+          authTimeout = null;
+        }
+
         console.log("[Dashboard] Auth state resolved:", user?.email || "null");
-        resolve(user);
+        
+        // Resolve promise dengan user
+        if (authStateResolver) {
+          authStateResolver(user);
+          authStateResolver = null;
+        }
+
+        // Clean up listener setelah resolve
+        if (authUnsubscribe) {
+          authUnsubscribe();
+          authUnsubscribe = null;
+        }
       });
     });
   }
+
+  // Clean up function untuk memastikan tidak ada memory leaks
+  function cleanupAuthState() {
+    if (authUnsubscribe) {
+      authUnsubscribe();
+      authUnsubscribe = null;
+    }
+    if (authTimeout) {
+      clearTimeout(authTimeout);
+      authTimeout = null;
+    }
+    authStateResolver = null;
+  }
+
+  // Clean up saat page unload
+  window.addEventListener('beforeunload', cleanupAuthState);
 
   async function initDashboard() {
     try {
@@ -537,11 +613,7 @@
   }
 
   function destroyCharts() {
-    Object.values(charts).forEach((c) => {
-      try {
-        c.destroy();
-      } catch (e) {}
-    });
+    Object.values(charts).forEach((c) => destroyChart(c));
     charts = {};
   }
 
@@ -590,6 +662,7 @@
     const bgColors = byCat.map((c, i) => getColorBg(c.colorCode) + "CC");
     const borderColors = byCat.map((c, i) => getColorBg(c.colorCode));
 
+    destroyChart(charts.bar);
     charts.bar = new Chart(ctx, {
       type: "bar",
       data: {
@@ -649,6 +722,7 @@
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const byCat = computeCategoryTotals();
+    destroyChart(charts.pie);
     if (!byCat.length) {
       charts.pie = new Chart(ctx, {
         type: "doughnut",
@@ -671,6 +745,7 @@
     const data = byCat.map((c) => c.total);
     const bg = byCat.map((c) => getColorBg(c.colorCode));
 
+    destroyChart(charts.pie);
     charts.pie = new Chart(ctx, {
       type: "doughnut",
       data: {
@@ -718,6 +793,7 @@
     const canvas = document.getElementById("lineChart");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    destroyChart(charts.line);
 
     const daysInMonth = DateUtils.daysInMonth(currentMonth);
     const labels = Array.from({ length: daysInMonth }, (_, i) =>

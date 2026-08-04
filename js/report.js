@@ -22,6 +22,32 @@
     },
   };
 
+  // Chart cleanup function to prevent memory leaks
+  function destroyChart(chartInstance) {
+    if (chartInstance) {
+      try {
+        chartInstance.destroy();
+        chartInstance = null;
+      } catch (e) {
+        console.warn("Error destroying chart:", e);
+      }
+    }
+  }
+
+  function destroyAllCharts() {
+    destroyChart(state.charts.pie);
+    destroyChart(state.charts.bar);
+    destroyChart(state.charts.line);
+    state.charts = {
+      pie: null,
+      bar: null,
+      line: null,
+    };
+  }
+
+  // Clean up charts when page is unloaded
+  window.addEventListener('beforeunload', destroyAllCharts);
+
   function getColorBg(code) {
     const map = Defaults.categoryColorMap || {};
     const val = map[code];
@@ -215,7 +241,7 @@
     const labels = entries.map((e) => e.name);
     const data = entries.map((e) => e.amount);
     const colors = entries.map((e) => getColorBg(e.colorCode));
-    if (state.charts.pie) state.charts.pie.destroy();
+    destroyChart(state.charts.pie);
     if (data.length === 0) {
       state.charts.pie = new Chart(ctx, {
         type: "doughnut",
@@ -292,7 +318,7 @@
     // is actually needed for the chart below.
     const bgColors = entries.map((e) => getColorBg(e.colorCode) + "CC");
 
-    if (state.charts.bar) state.charts.bar.destroy();
+    destroyChart(state.charts.bar);
     state.charts.bar = new Chart(ctx, {
       type: "bar",
       data: {
@@ -368,7 +394,7 @@
       return g;
     };
 
-    if (state.charts.line) state.charts.line.destroy();
+    destroyChart(state.charts.line);
     state.charts.line = new Chart(ctx, {
       type: "line",
       data: {
