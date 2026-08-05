@@ -196,6 +196,7 @@
       await loadTransactions();
       setupSalaryForm();
       setupSearch();
+      setupSmartNavigation();
       updateAll();
     } catch (e) {
       console.error("Dashboard init error:", e);

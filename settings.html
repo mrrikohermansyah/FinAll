@@ -36,6 +36,330 @@
       <link rel="stylesheet" href="css/dashboard.css" />
       <link rel="stylesheet" href="css/non-critical.css" />
     </noscript>
+    <style>
+      /* ============================================
+         Settings Page - Mobile Responsive Optimization
+         ============================================ */
+
+      /* Settings tabs - make horizontally scrollable on all devices */
+      .settings-tabs {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 8px;
+        padding: 16px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+      }
+      .settings-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+      }
+
+      @media (min-width: 769px) {
+        .settings-tabs {
+          position: sticky;
+          top: calc(64px + env(safe-area-inset-top, 0px));
+          z-index: 99;
+        }
+        .page-content {
+          padding-top: 16px;
+        }
+        .settings-section {
+          padding-top: 0;
+        }
+        .settings-section.active {
+          padding-top: 0;
+        }
+        .settings-section .card {
+          margin-top: 16px;
+        }
+        .settings-section.active .card:first-child {
+          margin-top: calc(64px + env(safe-area-inset-top, 0px)); /* Account for topbar */
+        }
+      }
+
+      @media (max-width: 768px) {
+        /* Prevent horizontal overflow but allow vertical scrolling */
+        html, body {
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: 100vh;
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior-y: auto !important;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+        .main-content, .page-content {
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: auto;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+          padding-top: 16px;
+        }
+        .settings-section {
+          padding-top: 0;
+        }
+        .settings-section.active {
+          padding-top: calc(74px + env(safe-area-inset-top, 0px)); /* Account for fixed topbar (58px) + tabs (16px) on mobile */
+        }
+        .settings-section .card {
+          margin-top: 12px;
+        }
+        .settings-section.active .card:first-child {
+          margin-top: 0;
+        }
+
+        /* Ensure all containers allow scrolling */
+        .app-layout {
+          height: auto !important;
+          min-height: 100vh;
+          overflow: visible;
+        }
+
+        /* Fix topbar to prevent it from scrolling with content */
+        .topbar {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 100 !important;
+          background: var(--surface) !important;
+          border-bottom: 1px solid var(--border) !important;
+          touch-action: none;
+          padding: 0 16px !important;
+          height: 58px !important;
+          padding-top: env(safe-area-inset-top, 0px) !important;
+          padding-left: calc(16px + env(safe-area-inset-left, 0px)) !important;
+          padding-right: calc(16px + env(safe-area-inset-right, 0px)) !important;
+        }
+
+        /* Settings tabs - make horizontally scrollable and sticky on mobile */
+        .settings-tabs {
+          position: sticky;
+          top: calc(58px + env(safe-area-inset-top, 0px)); /* Adjust for mobile topbar height */
+          z-index: 99;
+        }
+
+        .settings-tab {
+          flex-shrink: 0;
+          white-space: nowrap;
+          padding: 6px 14px;
+          font-size: 13px;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border);
+          background: var(--surface-alt);
+          color: var(--text-secondary);
+          transition: all var(--transition-fast);
+        }
+        .settings-tab.active {
+          background: var(--primary);
+          color: white;
+          border-color: var(--primary);
+        }
+        .settings-tab svg {
+          width: 14px;
+          height: 14px;
+        }
+
+        /* Card responsive adjustments */
+        .card {
+          padding: 16px;
+          border-radius: var(--radius-md);
+          margin-top: 0;
+        }
+        .card:first-child {
+          margin-top: 0;
+        }
+        .card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .card-title {
+          font-size: 16px;
+        }
+        .card-subtitle {
+          font-size: 12px;
+        }
+
+        /* Category chips - make them wrap nicely */
+        .chip {
+          font-size: 11px;
+          padding: 4px 10px;
+        }
+
+        /* Table responsive - make it scrollable horizontally */
+        .table-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+        .table {
+          min-width: 600px; /* Ensure table maintains minimum width */
+        }
+        .table th,
+        .table td {
+          padding: 10px 12px;
+          font-size: 12px;
+        }
+
+        /* Action buttons in table */
+        .btn-sm {
+          padding: 6px 10px;
+          font-size: 11px;
+        }
+
+        /* Color legend chips - stack vertically on very small screens */
+        @media (max-width: 480px) {
+          .card-body > div[style*="display: flex"][style*="gap: 16px"] {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+          }
+        }
+
+        /* Profile form mobile optimization */
+        #profileForm {
+          max-width: 100% !important;
+        }
+        #profileForm > div[style*="display: flex"][style*="gap: 20px"] {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 16px;
+        }
+        .user-avatar[data-user-avatar] {
+          width: 64px !important;
+          height: 64px !important;
+          font-size: 24px !important;
+        }
+
+        /* Form adjustments */
+        .form-control {
+          font-size: 16px !important; /* Prevent iOS zoom */
+          padding: 12px 14px !important;
+          min-height: 48px !important;
+        }
+
+        /* Modal mobile optimization */
+        .modal {
+          max-width: 95% !important;
+          margin: 10px;
+          max-height: 85vh;
+        }
+        .modal-header,
+        .modal-body,
+        .modal-footer {
+          padding: 16px;
+        }
+
+        /* Button adjustments */
+        .btn {
+          min-height: 44px;
+          padding: 10px 16px;
+        }
+
+        /* Preferences section */
+        .card-body > div[style*="max-width: 600px"] {
+          max-width: 100% !important;
+        }
+
+        /* Version section */
+        .card-body > div[style*="display: flex"][style*="justify-content: space-between"] {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+        }
+        .card-body > div[style*="display: flex"][style*="justify-content: space-between"] > div:last-child {
+          text-align: left;
+          width: 100%;
+        }
+        .card-body > div[style*="display: flex"][style*="justify-content: space-between"] .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        /* Danger zone section */
+        .card-body > div[style*="display: flex"][style*="flex-wrap: wrap"] {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+        .card-body > div[style*="display: flex"][style*="flex-wrap: wrap"] .btn {
+          width: 100%;
+          justify-content: center;
+        }
+
+        /* Ensure modal overlay doesn't block scrolling when closed */
+        .modal-overlay {
+          pointer-events: none;
+        }
+        .modal-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Remove any fixed positioning that might block scroll */
+        .sidebar-overlay {
+          pointer-events: none;
+        }
+        .sidebar-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Ensure buttons and interactive elements don't block scroll */
+        .btn, .action-btn, .nav-item {
+          touch-action: manipulation;
+        }
+
+        /* Fix any potential scroll blocking from other elements */
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure fixed elements don't block scroll */
+        .mobile-bottom-nav {
+          pointer-events: none;
+          z-index: 1000;
+        }
+        .mobile-bottom-nav .mobile-nav-item {
+          pointer-events: auto;
+        }
+
+        /* Fix sidebar overlay */
+        .sidebar-overlay {
+          z-index: 101;
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Even smaller adjustments */
+        .settings-tabs {
+          padding: 10px 12px;
+          gap: 6px;
+        }
+        .settings-tab {
+          padding: 6px 12px;
+          font-size: 12px;
+        }
+        .card {
+          padding: 12px;
+        }
+        .card-header {
+          padding-bottom: 12px;
+        }
+        .btn {
+          font-size: 13px;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="loading-screen">
@@ -352,48 +676,27 @@
                 </button>
               </div>
               <div class="card-body">
-                <div
-                  style="
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;
-                    margin-bottom: 20px;
-                    flex-wrap: wrap;
-                  "
-                >
-                  <div
-                    class="chip"
-                    style="
-                      background: rgba(95, 141, 126, 0.1);
-                      border-color: rgba(95, 141, 126, 0.3);
-                      color: #5f8d7e;
-                    "
-                  >
+                <div class="color-legend">
+                  <div class="legend-item">
                     <span class="color-dot" style="background: #5f8d7e"></span>
-                    Sage Green = Berubah setiap bulan
+                    <span>Sage Green = Berubah setiap bulan</span>
                   </div>
-                  <div
-                    class="chip"
-                    style="
-                      background: rgba(244, 162, 97, 0.1);
-                      border-color: rgba(244, 162, 97, 0.3);
-                      color: #f4a261;
-                    "
-                  >
+                  <div class="legend-item">
                     <span class="color-dot" style="background: #f4a261"></span>
-                    Orange Soft = Nominal tetap
+                    <span>Orange Soft = Nominal tetap</span>
                   </div>
-                  <div
-                    class="chip"
-                    style="
-                      background: rgba(255, 209, 102, 0.2);
-                      border-color: rgba(255, 209, 102, 0.5);
-                      color: #c49417;
-                    "
-                  >
+                  <div class="legend-item">
                     <span class="color-dot" style="background: #ffd166"></span>
-                    Kuning = Prioritas tinggi
+                    <span>Kuning = Prioritas tinggi</span>
                   </div>
+                </div>
+                <div class="category-actions">
+                  <button class="btn btn-secondary btn-sm" id="selectAllBtn">
+                    Pilih Semua
+                  </button>
+                  <button class="btn btn-danger btn-sm" id="batchDeleteBtn" style="display: none;">
+                    Hapus Terpilih
+                  </button>
                 </div>
                 <div id="categoriesList">
                   <div class="table-empty">Memuat data kategori...</div>
@@ -430,11 +733,8 @@
                   Tambah Admin
                 </button>
               </div>
-              <div class="card-body" style="padding: 0">
-                <div
-                  class="table-wrapper"
-                  style="border-radius: 0; border: none"
-                >
+              <div class="card-body admin-table-container">
+                <div class="table-wrapper">
                   <table class="table" id="adminTable">
                     <thead>
                       <tr>
@@ -668,52 +968,24 @@
                 <div class="card-title">Profil Akun</div>
               </div>
               <div class="card-body">
-                <form id="profileForm" style="max-width: 560px">
-                  <div
-                    style="
-                      display: flex;
-                      align-items: center;
-                      gap: 20px;
-                      margin-bottom: 24px;
-                      padding: 20px;
-                      background: var(--surface-alt);
-                      border-radius: var(--radius-md);
-                    "
-                  >
+                <form id="profileForm">
+                  <div class="profile-header">
                     <div
-                      class="user-avatar"
+                      class="user-avatar profile-avatar"
                       data-user-avatar
-                      style="width: 72px; height: 72px; font-size: 28px"
                     >
                       ?
                     </div>
-                    <div>
-                      <div
-                        style="font-weight: 700; font-size: 18px"
-                        id="profileNameDisplay"
-                      >
+                    <div class="profile-info">
+                      <h3 id="profileNameDisplay">
                         Memuat...
-                      </div>
-                      <div
-                        style="
-                          font-size: 13px;
-                          color: var(--text-muted);
-                          margin-top: 3px;
-                        "
-                        id="profileEmailDisplay"
-                      >
+                      </h3>
+                      <p id="profileEmailDisplay">
                         ...
-                      </div>
-                      <div
-                        style="
-                          font-size: 12px;
-                          color: var(--text-muted);
-                          margin-top: 6px;
-                        "
-                        id="profileJoinedDisplay"
-                      >
+                      </p>
+                      <small id="profileJoinedDisplay">
                         Bergabung sejak: -
-                      </div>
+                      </small>
                     </div>
                   </div>
                   <div class="form-group">
@@ -777,31 +1049,18 @@
                   </div>
                 </div>
               </div>
-              <div
-                class="card-body"
-                style="
-                  display: flex;
-                  align-items: center;
-                  justify-content: space-between;
-                  gap: 16px;
-                  flex-wrap: wrap;
-                "
-              >
-                <div>
-                  <div style="font-weight: 600">Keluar dari Semua Sesi</div>
-                  <div
-                    style="
-                      font-size: 12px;
-                      color: var(--text-muted);
-                      margin-top: 3px;
-                    "
-                  >
-                    Anda harus login kembali di semua perangkat
+              <div class="card-body">
+                <div class="danger-zone">
+                  <div class="danger-info">
+                    <h4>Keluar dari Semua Sesi</h4>
+                    <p>
+                      Anda harus login kembali di semua perangkat
+                    </p>
                   </div>
+                  <button class="btn btn-secondary btn-sm" data-logout>
+                    Keluar Sekarang
+                  </button>
                 </div>
-                <button class="btn btn-secondary btn-sm" data-logout>
-                  Keluar Sekarang
-                </button>
               </div>
             </div>
           </section>

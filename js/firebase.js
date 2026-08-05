@@ -6,8 +6,8 @@
 // ⚠️ PENTING: Ganti konfigurasi di bawah ini dengan Firebase Project Anda
 // Dapatkan dari Firebase Console → Project Settings → Add App
 const authDomainByHost = {
-  localhost: "localhost",
-  "127.0.0.1": "127.0.0.1",
+  localhost: "app.futureproject.my.id",
+  "127.0.0.1": "app.futureproject.my.id",
   "192.168.7.144": "192.168.7.144",
   "app.futureproject.my.id": "app.futureproject.my.id",
   "finall.futureproject.my.id": "app.futureproject.my.id",
@@ -1205,6 +1205,65 @@ function setupSidebar() {
   sidebar.querySelectorAll(".nav-item").forEach((item) => {
     item.addEventListener("click", () => close());
   });
+
+  // Close sidebar when clicking outside of it
+  document.addEventListener("click", (e) => {
+    if (sidebar.classList.contains("open")) {
+      // Check if click is outside sidebar and not on toggle button
+      if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+        close();
+      }
+    }
+  });
+}
+
+/* ============================================
+   Smart Navigation - Prevent Reload on Active Page
+   ============================================ */
+function setupSmartNavigation() {
+  const navItems = document.querySelectorAll('.nav-item, .mobile-nav-item');
+  
+  navItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+      const targetHref = this.getAttribute('href');
+      const currentPage = window.location.pathname.split('/').pop();
+      
+      // Cek apakah user mengklik menu yang sedang aktif
+      if (targetHref === currentPage) {
+        e.preventDefault(); // Mencegah reload
+        
+        // Scroll ke top untuk memberikan feedback visual
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Refresh data halaman saat ini jika fungsi tersedia
+        refreshCurrentPageData();
+      }
+    });
+  });
+}
+
+function refreshCurrentPageData() {
+  // Refresh data berdasarkan halaman saat ini
+  const currentPage = window.location.pathname.split('/').pop();
+  
+  switch(currentPage) {
+    case 'dashboard.html':
+      // Trigger refresh dashboard data
+      if (typeof updateAll === 'function') updateAll();
+      break;
+    case 'transaction.html':
+      // Trigger refresh transaction data
+      if (typeof applyFilters === 'function') applyFilters();
+      if (typeof renderAll === 'function') renderAll();
+      break;
+    case 'reports.html':
+      // Trigger refresh report data
+      if (typeof updateAll === 'function') updateAll();
+      break;
+    case 'settings.html':
+      // Settings page refresh jika diperlukan
+      break;
+  }
 }
 
 /* ============================================
@@ -1357,6 +1416,7 @@ window.Modal = Modal;
 window.Theme = Theme;
 window.DB = DB;
 window.DateUtils = DateUtils;
+window.setupSmartNavigation = setupSmartNavigation;
 window.Exporter = Exporter;
 window.Loader = Loader;
 window.Defaults = Defaults;

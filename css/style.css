@@ -648,6 +648,7 @@ input[type="radio"] {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: calc(64px + env(safe-area-inset-top, 0px));
 }
 
 .topbar {
@@ -662,8 +663,10 @@ input[type="radio"] {
   padding-left: calc(28px + env(safe-area-inset-left, 0px));
   padding-right: calc(28px + env(safe-area-inset-right, 0px));
   height: calc(64px + env(safe-area-inset-top, 0px));
-  position: sticky;
+  position: fixed;
   top: 0;
+  right: 0;
+  left: 260px;
   z-index: 50;
 }
 
@@ -1553,6 +1556,79 @@ select.form-control {
   min-width: 160px;
 }
 
+/* Compact Filter Bar */
+.filter-bar--compact {
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.filter-bar--compact .filter-toggle-btn {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-bar--compact .filter-toggle-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.filter-bar--compact .filter-toggle-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.filter-bar--compact .filter-controls {
+  display: none;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-bar--compact .filter-controls.visible {
+  display: flex;
+}
+
+.filter-bar--compact .filter-select {
+  height: 32px;
+  min-width: 120px;
+  font-size: 13px;
+  padding: 0 8px;
+}
+
+.filter-bar--compact .spacer {
+  display: none;
+}
+
+.filter-bar--compact .filter-actions {
+  display: none;
+  gap: 6px;
+}
+
+.filter-bar--compact .filter-actions.visible {
+  display: flex;
+}
+
+.filter-bar--compact .btn-sm {
+  height: 32px;
+  font-size: 12px;
+  padding: 0 12px;
+}
+
 .filter-bar .spacer {
   flex: 1;
 }
@@ -1915,6 +1991,10 @@ select.form-control {
     margin-left: 0;
   }
 
+  .topbar {
+    left: 0;
+  }
+
   .menu-toggle {
     display: flex;
   }
@@ -1947,6 +2027,30 @@ select.form-control {
     padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 
+  .filter-bar--compact {
+    padding: 8px 12px;
+  }
+
+  .filter-bar--compact .filter-controls.visible {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .filter-bar--compact .filter-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .filter-bar--compact .filter-actions.visible {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .filter-bar--compact .filter-actions.visible .btn {
+    flex: 1;
+  }
+
   .topbar {
     padding: 0 16px;
     height: 58px;
@@ -1954,6 +2058,10 @@ select.form-control {
     padding-left: calc(16px + env(safe-area-inset-left, 0px));
     padding-right: calc(16px + env(safe-area-inset-right, 0px));
     height: calc(58px + env(safe-area-inset-top, 0px));
+  }
+
+  .main-content {
+    padding-top: calc(58px + env(safe-area-inset-top, 0px));
   }
 
   .menu-toggle {
@@ -2045,6 +2153,7 @@ select.form-control {
 
   .main-content {
     padding-bottom: 80px;
+    padding-top: calc(58px + env(safe-area-inset-top, 0px));
   }
 
   /* Hide sidebar on mobile */

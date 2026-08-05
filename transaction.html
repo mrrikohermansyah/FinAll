@@ -122,16 +122,93 @@
       }
 
       @media (max-width: 768px) {
-        /* Prevent horizontal overflow */
+        /* Prevent horizontal overflow but allow vertical scrolling */
         html, body {
-          overflow-x: hidden;
-          width: 100%;
-          max-width: 100%;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: 100vh;
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior-y: auto !important;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
         }
         .main-content, .page-content {
-          overflow-x: hidden;
-          width: 100%;
-          max-width: 100%;
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: auto;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+
+        /* Ensure all containers allow scrolling */
+        .app-layout {
+          height: auto !important;
+          min-height: 100vh;
+          overflow: visible;
+        }
+
+        /* Fix scrolling on transaction container */
+        .transaction-grid {
+          overflow-y: visible !important;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+
+        /* Card view should be scrollable */
+        #cardView {
+          overflow-y: visible !important;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+
+        /* Ensure modal overlay doesn't block scrolling when closed */
+        .modal-overlay {
+          pointer-events: none;
+        }
+        .modal-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Remove any fixed positioning that might block scroll */
+        .sidebar-overlay {
+          pointer-events: none;
+        }
+        .sidebar-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Ensure buttons and interactive elements don't block scroll */
+        .btn, .action-btn, .nav-item {
+          touch-action: manipulation;
+        }
+
+        /* Fix any potential scroll blocking from other elements */
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure fixed elements don't block scroll */
+        .mobile-bottom-nav {
+          pointer-events: none;
+        }
+        .mobile-bottom-nav .mobile-nav-item {
+          pointer-events: auto;
+        }
+
+        /* Topbar should not block scroll */
+        .topbar {
+          touch-action: none;
+        }
+
+        /* FAB should not block scroll */
+        .fab {
+          pointer-events: auto;
         }
 
         /* Filter bar: stack everything full-width */
@@ -148,6 +225,27 @@
         }
         .filter-bar .spacer {
           display: none;
+        }
+        
+        /* Compact filter bar mobile */
+        .filter-bar--compact {
+          padding: 8px 12px;
+        }
+        .filter-bar--compact .filter-controls.visible {
+          flex-direction: column;
+          align-items: stretch;
+          width: 100%;
+        }
+        .filter-bar--compact .filter-select {
+          width: 100%;
+          min-width: auto;
+        }
+        .filter-bar--compact .filter-actions.visible {
+          width: 100%;
+          justify-content: space-between;
+        }
+        .filter-bar--compact .filter-actions.visible .btn {
+          flex: 1;
         }
         .filter-actions {
           width: 100%;
@@ -563,34 +661,39 @@
 
         <main class="page-content">
           <!-- Filter Bar -->
-          <div class="filter-bar">
+          <div class="filter-bar filter-bar--compact" id="filterBar">
+            <!-- Filter Toggle Button -->
+            <button class="filter-toggle-btn" id="filterToggle" title="Toggle Filter">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+            </button>
+            
+            <!-- Filter Controls -->
+            <div class="filter-controls">
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="filterMonth"
-              style="max-width: 160px"
             >
               <option value="">Semua Bulan</option>
             </select>
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="filterYear"
-              style="max-width: 130px"
             >
               <option value="">Semua Tahun</option>
             </select>
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="filterStatus"
-              style="max-width: 170px"
             >
               <option value="">Semua Status</option>
               <option value="paid">Sudah Dibayar</option>
               <option value="unpaid">Belum Dibayar</option>
             </select>
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="filterColor"
-              style="max-width: 170px"
             >
               <option value="">Semua Warna</option>
               <option value="sage">🟢 Sage (Berubah)</option>
@@ -598,9 +701,8 @@
               <option value="yellow">🟡 Kuning (Prioritas)</option>
             </select>
             <select
-              class="form-control"
+              class="form-control filter-select"
               id="filterCategory"
-              style="max-width: 180px"
             >
               <option value="">Semua Kategori</option>
             </select>
@@ -658,6 +760,7 @@
                 </svg>
                 Print
               </button>
+            </div>
             </div>
           </div>
 

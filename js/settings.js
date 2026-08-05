@@ -10,6 +10,7 @@
   let adminTransactions = [];
   let editingCategoryId = null;
   let editingAdminId = null;
+  let selectedCategories = new Set();
 
   const COLORS = [
     { code: 'sage',   label: 'Sage Green (Berubah)', bg:'#5F8D7E' },
@@ -38,6 +39,7 @@
       setupAdminButtons();
       setupProfileForm();
       setupPreferences();
+      setupSmartNavigation();
       loadAppVersion();
 
       await Promise.all([loadCategories(), loadAdminTransactions()]);
@@ -103,14 +105,19 @@
     if (!list) return;
     if (!categories.length) {
       list.innerHTML = `<div class="table-empty"><div class="table-empty-title">Belum ada kategori</div><div class="table-empty-desc">Tambahkan kategori pertama Anda</div></div>`;
+      updateBatchDeleteButton();
       return;
     }
     const typeLabel = { fixed: 'Tetap', variable: 'Berubah', saving: 'Tabungan / Prioritas' };
     list.innerHTML = categories.map(c => {
       const initial = ((c.name || '?')[0]?.toUpperCase() || '?');
       const colorBg = getColorBg(c.colorCode || 'sage');
+      const isSelected = selectedCategories.has(c.id);
       return `
-        <div class="category-card animate-fade-up">
+        <div class="category-card animate-fade-up ${isSelected ? 'selected' : ''}">
+          <div class="category-checkbox">
+            <input type="checkbox" class="category-select" data-id="${Sanitize.string(c.id)}" ${isSelected ? 'checked' : ''} onchange="event.stopPropagation(); toggleCategorySelection('${Sanitize.string(c.id)}')">
+          </div>
           <div class="category-color" style="background:${colorBg};">${Sanitize.string(initial)}</div>
           <div class="category-info">
             <div class="category-name">${Sanitize.string(c.name || '-')}</div>
@@ -121,16 +128,17 @@
             </div>
           </div>
           <div class="category-actions">
-            <button class="action-btn edit tooltip" onclick="editCategory('${Sanitize.string(c.id)}')" data-tooltip="Edit">
+            <button class="action-btn edit tooltip" onclick="event.stopPropagation(); editCategory('${Sanitize.string(c.id)}')" data-tooltip="Edit">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             </button>
-            <button class="action-btn delete tooltip" onclick="deleteCategory('${Sanitize.string(c.id)}')" data-tooltip="Hapus">
+            <button class="action-btn delete tooltip" onclick="event.stopPropagation(); deleteCategory('${Sanitize.string(c.id)}')" data-tooltip="Hapus">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
           </div>
         </div>
       `;
     }).join('');
+    updateBatchDeleteButton();
   }
 
   function setupCategoryButtons() {
@@ -139,6 +147,20 @@
 
     const submitBtn = document.getElementById('catSubmitBtn');
     if (submitBtn) submitBtn.addEventListener('click', submitCategory);
+
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    console.log('batchDeleteBtn found:', batchDeleteBtn);
+    if (batchDeleteBtn) {
+      batchDeleteBtn.addEventListener('click', deleteSelectedCategories);
+      console.log('Event listener added to batchDeleteBtn');
+    }
+
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    console.log('selectAllBtn found:', selectAllBtn);
+    if (selectAllBtn) {
+      selectAllBtn.addEventListener('click', toggleSelectAll);
+      console.log('Event listener added to selectAllBtn');
+    }
   }
 
   function setupColorPicker() {
@@ -188,23 +210,89 @@
   };
 
   window.deleteCategory = function(id) {
+    console.log('deleteCategory called with id:', id);
     const cat = categories.find(c => c.id === id);
-    if (!cat) return;
-    if (cat.default) return Toast.warning('Kategori default tidak bisa dihapus');
+    console.log('Found category:', cat);
+    if (!cat) return Toast.error('Kategori tidak ditemukan');
     Modal.confirm(
       `Hapus kategori "${Sanitize.string(cat.name || '-')}"? Transaksi yang menggunakan kategori ini tidak akan terpengaruh.`,
       async () => {
         try {
+          console.log('Deleting category with id:', id);
           await DB.delete('categories', id);
           Toast.success('Kategori berhasil dihapus');
+          selectedCategories.delete(id);
           await loadCategories();
           renderCategories();
-        } catch (e) { Toast.error('Gagal menghapus kategori'); }
+        } catch (e) {
+          console.error('Error deleting category:', e);
+          Toast.error('Gagal menghapus kategori');
+        }
       },
       'Hapus Kategori',
       'Ya, Hapus'
     );
   };
+
+  window.toggleCategorySelection = function(id) {
+    if (selectedCategories.has(id)) {
+      selectedCategories.delete(id);
+    } else {
+      selectedCategories.add(id);
+    }
+    updateBatchDeleteButton();
+  };
+
+  window.toggleSelectAll = function() {
+    if (selectedCategories.size === categories.length) {
+      selectedCategories.clear();
+    } else {
+      categories.forEach(c => selectedCategories.add(c.id));
+    }
+    renderCategories();
+  };
+
+  window.deleteSelectedCategories = function() {
+    console.log('deleteSelectedCategories called');
+    console.log('selectedCategories:', selectedCategories);
+    console.log('selectedCategories.size:', selectedCategories.size);
+    if (selectedCategories.size === 0) {
+      return Toast.warning('Pilih kategori yang ingin dihapus');
+    }
+    const count = selectedCategories.size;
+    Modal.confirm(
+      `Hapus ${count} kategori yang dipilih? Transaksi yang menggunakan kategori ini tidak akan terpengaruh.`,
+      async () => {
+        try {
+          console.log('Deleting selected categories:', Array.from(selectedCategories));
+          const deletePromises = Array.from(selectedCategories).map(id => DB.delete('categories', id));
+          await Promise.all(deletePromises);
+          Toast.success(`${count} kategori berhasil dihapus`);
+          selectedCategories.clear();
+          await loadCategories();
+          renderCategories();
+        } catch (e) {
+          console.error('Error deleting selected categories:', e);
+          Toast.error('Gagal menghapus beberapa kategori');
+        }
+      },
+      'Hapus Kategori',
+      'Ya, Hapus'
+    );
+  };
+
+  function updateBatchDeleteButton() {
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    console.log('updateBatchDeleteButton called, batchDeleteBtn:', batchDeleteBtn, 'selectedCategories.size:', selectedCategories.size);
+    if (batchDeleteBtn) {
+      if (selectedCategories.size === 0) {
+        batchDeleteBtn.style.display = 'none';
+      } else {
+        batchDeleteBtn.style.display = 'inline-flex';
+        batchDeleteBtn.textContent = `Hapus ${selectedCategories.size} Kategori`;
+      }
+    }
+  }
 
   async function submitCategory() {
     const name = Sanitize.string(document.getElementById('catName').value, 40);

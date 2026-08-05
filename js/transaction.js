@@ -47,6 +47,19 @@
       setupModalInputs();
       setupExportAndPrint();
       setupResetFilters();
+      setupSmartNavigation();
+
+      // Filter toggle functionality for compact filter bar
+      const filterToggle = document.getElementById("filterToggle");
+      const filterControls = document.querySelector(".filter-controls");
+      const filterActions = document.querySelector(".filter-actions");
+      if (filterToggle && filterControls && filterActions) {
+        filterToggle.addEventListener("click", () => {
+          filterControls.classList.toggle("visible");
+          filterActions.classList.toggle("visible");
+          filterToggle.classList.toggle("active");
+        });
+      }
 
       await Promise.all([
         loadCategories(),

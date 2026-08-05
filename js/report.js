@@ -51,9 +51,8 @@
   function getColorBg(code) {
     const map = Defaults.categoryColorMap || {};
     const val = map[code];
-    // Guard against non-string values (objects, undefined, etc.) that would
-    // break Chart.js / CanvasGradient color parsing.
-    return typeof val === "string" ? val : "var(--primary)";
+    // The categoryColorMap contains objects with bg property, not strings directly
+    return val && val.bg ? val.bg : "#5F8D7E";
   }
 
   function getCategoryById(id) {
@@ -285,7 +284,7 @@
               boxWidth: 12,
               padding: 10,
               font: { size: 11 },
-              color: "var(--text-secondary)",
+              color: "#6c757d",
             },
           },
           tooltip: {
@@ -344,12 +343,12 @@
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "var(--text-secondary)", font: { size: 10 } },
+            ticks: { color: "#6c757d", font: { size: 10 } },
           },
           y: {
-            grid: { color: "var(--border)", drawBorder: false },
+            grid: { color: "#e9ecef", drawBorder: false },
             ticks: {
-              color: "var(--text-secondary)",
+              color: "#6c757d",
               callback: (v) => IDR.formatShort(v),
             },
           },
@@ -403,38 +402,38 @@
           {
             label: "Gaji",
             data: salaryArr,
-            borderColor: "var(--primary)",
+            borderColor: "#5F8D7E",
             backgroundColor: makeGrad("#5F8D7E", "#5F8D7E"),
             borderWidth: 2.5,
             tension: 0.4,
             fill: true,
             pointRadius: 3,
             pointHoverRadius: 6,
-            pointBackgroundColor: "var(--primary)",
+            pointBackgroundColor: "#5F8D7E",
           },
           {
             label: "Alokasi",
             data: allocArr,
-            borderColor: "var(--accent)",
+            borderColor: "#F4A261",
             backgroundColor: makeGrad("#F4A261", "#F4A261"),
             borderWidth: 2.5,
             tension: 0.4,
             fill: true,
             pointRadius: 3,
             pointHoverRadius: 6,
-            pointBackgroundColor: "var(--accent)",
+            pointBackgroundColor: "#F4A261",
           },
           {
             label: "Sisa",
             data: remainingArr,
-            borderColor: "var(--success)",
+            borderColor: "#52B788",
             backgroundColor: makeGrad("#52B788", "#52B788"),
             borderWidth: 2.5,
             tension: 0.4,
             fill: true,
             pointRadius: 3,
             pointHoverRadius: 6,
-            pointBackgroundColor: "var(--success)",
+            pointBackgroundColor: "#52B788",
           },
           {
             label: "Tabungan",
@@ -462,7 +461,7 @@
               boxWidth: 12,
               padding: 12,
               font: { size: 11 },
-              color: "var(--text-secondary)",
+              color: "#6c757d",
               usePointStyle: true,
             },
           },
@@ -475,12 +474,12 @@
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: "var(--text-secondary)" },
+            ticks: { color: "#6c757d" },
           },
           y: {
-            grid: { color: "var(--border)", drawBorder: false },
+            grid: { color: "#e9ecef", drawBorder: false },
             ticks: {
-              color: "var(--text-secondary)",
+              color: "#6c757d",
               callback: (v) => IDR.formatShort(v),
             },
           },
@@ -681,6 +680,7 @@ tr.total{background:#F1F5F4;font-weight:700;}
       if (csvBtn) csvBtn.addEventListener("click", exportCSV);
       const printBtn = document.getElementById("printReportBtn");
       if (printBtn) printBtn.addEventListener("click", printReport);
+      setupSmartNavigation();
       await updateAll();
       Loader.hide();
     } catch (e) {

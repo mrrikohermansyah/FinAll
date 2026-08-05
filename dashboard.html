@@ -47,6 +47,195 @@
       <link rel="stylesheet" href="css/dashboard.css" />
       <link rel="stylesheet" href="css/non-critical.css" />
     </noscript>
+    <style>
+      /* ============================================
+         Dashboard Page - Mobile Responsive Patch
+         ============================================ */
+
+      @media (max-width: 768px) {
+        /* Prevent horizontal overflow but allow vertical scrolling */
+        html, body {
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: 100vh;
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior-y: auto !important;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+        .main-content, .page-content {
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: auto;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+
+        /* Ensure all containers allow scrolling */
+        .app-layout {
+          height: auto !important;
+          min-height: 100vh;
+          overflow: visible;
+        }
+
+        /* Ensure modal overlay doesn't block scrolling when closed */
+        .modal-overlay {
+          pointer-events: none;
+        }
+        .modal-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Remove any fixed positioning that might block scroll */
+        .sidebar-overlay {
+          pointer-events: none;
+        }
+        .sidebar-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Ensure buttons and interactive elements don't block scroll */
+        .btn, .action-btn, .nav-item {
+          touch-action: manipulation;
+        }
+
+        /* Fix any potential scroll blocking from other elements */
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure fixed elements don't block scroll */
+        .mobile-bottom-nav {
+          pointer-events: none;
+        }
+        .mobile-bottom-nav .mobile-nav-item {
+          pointer-events: auto;
+        }
+
+        /* Topbar should not block scroll */
+        .topbar {
+          touch-action: none;
+        }
+
+        /* FAB should not block scroll */
+        .fab {
+          pointer-events: auto;
+        }
+
+        /* Stats grid: responsive layout */
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px;
+          width: 100%;
+          max-width: 100%;
+          overflow-y: visible;
+          height: auto;
+        }
+        .stat-card {
+          padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          overflow-y: visible;
+        }
+        .stat-value {
+          font-size: 20px;
+        }
+
+        /* Charts grid: stack vertically */
+        .charts-grid {
+          grid-template-columns: 1fr !important;
+          gap: 16px;
+          width: 100%;
+          max-width: 100%;
+          overflow-y: visible;
+          height: auto;
+        }
+        .charts-grid .chart-card:first-child,
+        .charts-grid .chart-double {
+          grid-column: span 1 !important;
+        }
+        .chart-card {
+          padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          overflow-y: visible;
+          height: auto;
+        }
+        .chart-container {
+          height: 240px;
+          width: 100%;
+          overflow-y: visible;
+        }
+
+        /* Status grid: responsive layout */
+        .status-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px;
+          width: 100%;
+          max-width: 100%;
+          overflow-y: visible;
+          height: auto;
+        }
+        .status-card {
+          padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          overflow-y: visible;
+        }
+        .status-value {
+          font-size: 18px;
+        }
+
+        /* Category grid: responsive layout */
+        .category-grid {
+          grid-template-columns: repeat(2, 1fr) !important;
+          gap: 12px;
+          width: 100%;
+          max-width: 100%;
+          overflow-y: visible;
+          height: auto;
+        }
+        .category-card {
+          padding: 16px;
+          width: 100%;
+          box-sizing: border-box;
+          overflow-y: visible;
+        }
+
+        /* Circular progress adjustments */
+        .circular-wrapper {
+          width: 180px;
+          height: 180px;
+        }
+        .circular-percent {
+          font-size: 32px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .status-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .category-grid {
+          grid-template-columns: 1fr !important;
+        }
+        .stat-value {
+          font-size: 18px;
+        }
+        .status-value {
+          font-size: 16px;
+        }
+      }
+    </style>
   </head>
   <body>
     <div class="loading-screen">

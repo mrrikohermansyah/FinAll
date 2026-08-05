@@ -130,16 +130,79 @@
          ============================================ */
 
       @media (max-width: 768px) {
-        /* Prevent horizontal overflow */
+        /* Prevent horizontal overflow but allow vertical scrolling */
         html, body {
-          overflow-x: hidden;
-          width: 100%;
-          max-width: 100%;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: 100vh;
+          -webkit-overflow-scrolling: touch !important;
+          overscroll-behavior-y: auto !important;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
         }
         .main-content, .page-content {
-          overflow-x: hidden;
-          width: 100%;
-          max-width: 100%;
+          overflow-x: hidden !important;
+          overflow-y: visible !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          min-height: auto;
+          position: relative;
+          height: auto !important;
+          touch-action: pan-y;
+        }
+
+        /* Ensure all containers allow scrolling */
+        .app-layout {
+          height: auto !important;
+          min-height: 100vh;
+          overflow: visible;
+        }
+
+        /* Ensure modal overlay doesn't block scrolling when closed */
+        .modal-overlay {
+          pointer-events: none;
+        }
+        .modal-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Remove any fixed positioning that might block scroll */
+        .sidebar-overlay {
+          pointer-events: none;
+        }
+        .sidebar-overlay.active {
+          pointer-events: auto;
+        }
+
+        /* Ensure buttons and interactive elements don't block scroll */
+        .btn, .action-btn, .nav-item {
+          touch-action: manipulation;
+        }
+
+        /* Fix any potential scroll blocking from other elements */
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* Ensure fixed elements don't block scroll */
+        .mobile-bottom-nav {
+          pointer-events: none;
+        }
+        .mobile-bottom-nav .mobile-nav-item {
+          pointer-events: auto;
+        }
+
+        /* Topbar should not block scroll */
+        .topbar {
+          touch-action: none;
+        }
+
+        /* FAB should not block scroll */
+        .fab {
+          pointer-events: auto;
         }
 
         /* Filter bar: stack everything full-width */
